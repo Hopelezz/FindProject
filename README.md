@@ -53,6 +53,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
+This is a simple Folder Finder app. There are two scripts provided both built-in Powershell. 
+- `FindProject.ps1` is a command line editor
+- `FindProjectGui.ps1` is a Graphical User Interface.
 <!-- TODO: Add Product Image here -->
 
 <p align="right">(<a href="#top">back to top</a>)</p>

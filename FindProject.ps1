@@ -6,14 +6,14 @@ The Original Script is just a command line interface that runs a hashtable of di
 $defaultPath = "E:\CodeBase\"
 
 #Get Input for query
-$searchInput = Read-Host -Prompt "Project Name or Number?"
+$searchInput = Read-Host -Prompt "Enter Folder Name: "
 
 IF ($searchInput.Length -lt 3) {
     # closes the script if the input is less than 3 characters
 } ELSE {
 
     # Filters for F folders only
-    $filter = $searchInput+"*"
+    $filter = "*"+$searchInput+"*"
 
     # Get Items
     $items = Get-ChildItem -Recurse -filter $filter -Directory -Path $defaultPath -Depth 1 
