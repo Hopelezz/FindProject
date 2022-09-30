@@ -56,7 +56,9 @@
 This is a simple Folder Finder app. There are two scripts provided both built-in Powershell. 
 - `FindProject.ps1` is a command line editor
 - `FindProjectGui.ps1` is a Graphical User Interface.
-<!-- TODO: Add Product Image here -->
+<br />
+
+![image](https://user-images.githubusercontent.com/72772558/192170170-e65e15b4-c8f7-409c-a167-6257a93a41a5.png)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -139,7 +141,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 ## Contact
 
 - [Mark Spratt](https://github.com/Hopelezz)
-- [ChristopherStrom](https://github.com/ChristopherStrom)
+- [Christopher Strom](https://github.com/ChristopherStrom)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
