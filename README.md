@@ -109,6 +109,7 @@ Improvements:
 - [x] Add `Warning` if the input is empty or under 3 characters.
 - [x] Add `Warning` if the file is not found.
 - [x] Add `Try/Catch` to handle errors.
+- [x] Add `ContextMenu` to open Path in VS Code
 
 See the [open issues](https://github.com/Hopelezz/FindProject/issues) for a full list of proposed features (and known issues).
 
