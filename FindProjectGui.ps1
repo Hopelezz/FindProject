@@ -17,13 +17,13 @@ Add-Type -AssemblyName System.Windows.Forms
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Defines the Functionality of the Code.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-function Hide-Console
+FUNCTION Hide-Console
 {
     $consolePtr = [Console.Window]::GetConsoleWindow()
     #Set consolePtr to 0 to hide the console window
     [Console.Window]::ShowWindow($consolePtr, 0)
 }
-function Show-Console # Function Show-Console is only used on Error.
+FUNCTION Show-Console # Function Show-Console is only used on Error.
 {
     $consolePtr = [Console.Window]::GetConsoleWindow()
     [Console.Window]::ShowWindow($consolePtr, 4)
@@ -42,13 +42,13 @@ function Show-Console # Function Show-Console is only used on Error.
         # ShowDefault = 10,
         # ForceMinimized = 11
 }
-function Search-Project {
+FUNCTION Search-Project {
     $projectName = $SearchBox.text # Get Input for query from SearchBox
-    if ($projectName.Length -lt 3) {
+    IF($projectName.Length -lt 3) {
         # Display Warning label
         $WarningLabel.Text = "Input must contain at least 3 characters"
         $WarningLabel.Visible = $true
-    } else {
+    } ELSE {
         #Filter for folders and add to listbox
         $filter = "*"+$projectName+"*"
         $items = Get-ChildItem -Recurse -filter $filter -Directory -Path $dirPath -Depth 2
@@ -58,14 +58,35 @@ function Search-Project {
         # Sort ListBox alphanumerically
         $ListBox.Sorted = $true
         # If no items are found, show warning label
-        if ($ListBox.Items.Count -eq 0) {
+        IF($ListBox.Items.Count -eq 0) {
             $WarningLabel.Text = "No folders found"
             $WarningLabel.Visible = $true
-        } else {
+        } ELSE {
             $WarningLabel.Visible = $false
         }
     }
 }
+
+# function Search-Tree {
+# TODO: Add a function to Search Tree.txt instead of Get-ChildItem
+# }
+
+# Function will once a day check tree structure of the directory
+# function FindTree {
+#     $date = Get-Date -Format "yyyy-MM-dd"
+#     $treePath = $dirPath + "Tree.txt"
+#     IF(Test-Path $treePath) {
+#         $fileDate = Get-Date (Get-Item $treePath).LastWriteTime -Format "yyyy-MM-dd"
+#         IF($fileDate -ne $date) {
+#             Get-ChildItem -Path $dirPath -Recurse -Directory | Select-Object FullName | Out-File $treePath
+#         }
+#     } ELSE {
+#         Get-ChildItem -Path $dirPath -Recurse -Directory | Select-Object FullName | Out-File $treePath
+#     }
+# }
+# 
+# FindTree # Call FindTree function
+
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # The following code is used to create a GUI for the script.
@@ -132,9 +153,9 @@ $SearchButton = New-Object $ButtonObject
     # If button is clicked, run the function to search for text in the QueryTextBox
     $SearchButton.add_Click({
         $ListBox.Items.Clear();
-        try{
+        TRY {
             Search-Project -ProjectName $SearchBox.Text
-        }catch {
+        } CATCH {
             # If Search-Project fails, then show the console and display the error
             Show-Console
             Write-Error $_.Exception
@@ -143,7 +164,7 @@ $SearchButton = New-Object $ButtonObject
     })
     # if enter is pressed, click the search button
     $SearchBox.Add_KeyDown({
-        if ($_.KeyCode -eq "Enter") {
+        IF($_.KeyCode -eq "Enter") {
             $SearchButton.PerformClick()
         }
     })
@@ -170,9 +191,9 @@ $ListBox = New-Object $ListBoxObject
     [System.Windows.Forms.AnchorStyles]::Top
     # Double click to open the selected item
     $ListBox.add_DoubleClick({
-        try{
+        TRY {
             Start-Process  $ListBox.SelectedItem
-        }catch {
+        } CATCH {
             # If Start-Process fails, then show the console and display the error
             Show-Console
             Write-Error $_.Exception
@@ -181,10 +202,10 @@ $ListBox = New-Object $ListBoxObject
     })
     # Enter to open the selected item
     $ListBox.add_KeyDown({
-        if ($_.KeyCode -eq "Enter") {
-            try{
+        IF($_.KeyCode -eq "Enter") {
+            TRY {
                 Start-Process  $ListBox.SelectedItem
-            }catch {
+            } CATCH {
                 # If Start-Process fails, then show the console and display the error
                 Show-Console
                 Write-Error $_.Exception
@@ -194,9 +215,9 @@ $ListBox = New-Object $ListBoxObject
     })
     # Rightclick menu to select item and open context menu 
     $ListBox.add_MouseDown({
-        if($_.Button -eq "Right") {
+        IF($_.Button -eq "Right") {
             $ListBox.SelectedIndex = $ListBox.IndexFromPoint($_.Location)
-            if($ListBox.SelectedIndex -ne -1){
+            IF($ListBox.SelectedIndex -ne -1){
                 # Define the Menu Objects
                 $contextmenuService = New-Object $ContextMenuObject
                 $OpenWithVSCode = New-Object $MenuItemObject
@@ -209,15 +230,15 @@ $ListBox = New-Object $ListBoxObject
                 $contextmenuService.MenuItems.Add($OpenWithVSCode)  # Add the VSCode menu item
                 $contextmenuService.MenuItems.Add('-') # Adds a seperator
                 $contextmenuService.MenuItems.Add($OpenToFolder) # Add the Folder Properties menu item
-            } elseif($ListBox.SelectedIndex -eq -1) {
+            } ELSEIF($ListBox.SelectedIndex -eq -1) {
                 $ListBox.ContextMenu = $null    # If no item is selected, then remove the context menu
             }
             # If VSCode is selected, then open the selected item in VSCode
             $OpenWithVSCode.add_Click({
-                try{
+                TRY{
                     # Need to 
                     Start-Process -FilePath $VSPath $ListBox.SelectedItem
-                }catch {
+                } CATCH {
                     # If Start-Process fails, then show the console and display the error
                     Show-Console
                     Write-Error $_.Exception
@@ -226,10 +247,10 @@ $ListBox = New-Object $ListBoxObject
             })
             # If Folder Properties is selected, then open the selectedItem Folder Properties
             $OpenToFolder.add_Click({
-                try{
+                TRY {
                     $FolderPath = $ListBox.SelectedItem
                     Start-Process -FilePath explorer.exe "/select, $FolderPath"
-                   }catch {
+                   } CATCH {
                     # If Start-Process fails, then show the console and display the error
                     Show-Console
                     Write-Error $_.Exception
