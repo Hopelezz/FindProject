@@ -113,6 +113,8 @@ Improvements:
 - [x] Refactor Code to simplify and remove unused code. 
 - [ ] Add `Properties` menu to `ContextMenu` to open folder Properties.
   - This is rather complicated since (Start-Process -FilePath Explorer.exe "/select, $FolderPath") doesn't work, but it will Open To Folder and select it.
+- [ ] Add function to search paths from Tree.txt.
+  - Tree.txt is created from function FindTree{} and placed at $dirPath. The idea is to reduce the search impact on servers to once a day for the first user to search.
 
 See the [open issues](https://github.com/Hopelezz/FindProject/issues) for a full list of proposed features (and known issues).
 
