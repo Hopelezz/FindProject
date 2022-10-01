@@ -1,3 +1,8 @@
+# Change these to match your environment
+# Defines Default Folder Path
+$dirPath = "E:\" 
+# Defines Visual Studio Path
+$VSPath = "C:\Users\panze\AppData\Local\Programs\Microsoft VS Code\Code.exe" 
 
 # Adds console controls to the script
 Add-Type -Name Window -Namespace Console -MemberDefinition '
@@ -9,9 +14,16 @@ public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow);
 '
 # Adds a Form to the Console Window
 Add-Type -AssemblyName System.Windows.Forms
-
-# Function Show-Console is only used on Error.
-function Show-Console
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Defines the Functionality of the Code.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+function Hide-Console
+{
+    $consolePtr = [Console.Window]::GetConsoleWindow()
+    #Set consolePtr to 0 to hide the console window
+    [Console.Window]::ShowWindow($consolePtr, 0)
+}
+function Show-Console # Function Show-Console is only used on Error.
 {
     $consolePtr = [Console.Window]::GetConsoleWindow()
     [Console.Window]::ShowWindow($consolePtr, 4)
@@ -30,29 +42,17 @@ function Show-Console
         # ShowDefault = 10,
         # ForceMinimized = 11
 }
-
-# Otherwise we hide the console window
-function Hide-Console
-{
-    $consolePtr = [Console.Window]::GetConsoleWindow()
-    #Set consolePtr to 0 to hide the console window
-    [Console.Window]::ShowWindow($consolePtr, 0)
-}
-
 function Search-Project {
-    $dirPath = "E:\CodeBase\" # Defines Default Project Path
     $projectName = $SearchBox.text # Get Input for query from SearchBox
     if ($projectName.Length -lt 3) {
-        # Show Warning label
+        # Display Warning label
         $WarningLabel.Text = "Input must contain at least 3 characters"
         $WarningLabel.Visible = $true
     } else {
-        # Here you can filter for a sepicific file names
+        #Filter for folders and add to listbox
         $filter = "*"+$projectName+"*"
-        # Get Items that match the filter
-        $items = Get-ChildItem -Recurse -filter $filter -Directory -Path $dirPath -Depth 1
-        # and loop through each item to add it to the listbox
-        $items | Sort-Object -Property Name | ForEach-Object {
+        $items = Get-ChildItem -Recurse -filter $filter -Directory -Path $dirPath -Depth 2
+        $items | ForEach-Object {
             $ListBox.Items.Add($_.FullName)
         }
         # Sort ListBox alphanumerically
@@ -67,6 +67,9 @@ function Search-Project {
     }
 }
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# The following code is used to create a GUI for the script.
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Defines the form element variables
 $FormObject = [System.Windows.Forms.Form]
 $ButtonObject = [System.Windows.Forms.Button]
@@ -79,14 +82,15 @@ $MenuItemObject = [System.Windows.Forms.MenuItem]
 # Creates Base Form
 $GuiForm = New-Object $FormObject
     $GuiForm.ClientSize = New-Object System.Drawing.Size(700, 300)
-    $GuiForm.Text = "Find Project"
+    $GuiForm.Text = "Find Folder"
     $GuiForm.StartPosition = "CenterScreen"
     $GuiForm.BackColor = "White"
 
 # Function call to hide console when ran
-    Hide-Console
+Hide-Console
 
-# Sets the Favicon using a icon thats converted to base64. Due to the character length of the icon, is stored in a seperate file.
+# Sets the Favicon using a icon thats converted to base64.
+# Due to the character length of the icon, is stored in a seperate txt file.
 $text = Get-Content -Path: .\icon.txt -Raw
 $iconBase64 = $text
     $iconBytes       = [Convert]::FromBase64String($iconBase64)
@@ -96,7 +100,7 @@ $iconBase64 = $text
     
 # Label for input Box
 $SearchLabel = New-Object $LabelObject
-    $SearchLabel.Text = "Enter Project Name or Number."
+    $SearchLabel.Text = "Enter Folder Name:"
     $SearchLabel.AutoSize = $true
     $SearchLabel.Location = New-Object System.Drawing.Point(20, 10)
     $SearchLabel.Font = 'Arial, 13, style=Bold'
@@ -188,7 +192,6 @@ $ListBox = New-Object $ListBoxObject
             }
         }
     })
-
     # Rightclick menu to select item and open context menu 
     $ListBox.add_MouseDown({
         if($_.Button -eq "Right") {
@@ -198,23 +201,22 @@ $ListBox = New-Object $ListBoxObject
                 $contextmenuService = New-Object $ContextMenuObject
                 $OpenWithVSCode = New-Object $MenuItemObject
                 $OpenWithVSCode.Text = "Open With VSCode"
-                $OpenFolderProperties = New-Object $MenuItemObject
-                $OpenFolderProperties.Text = "Open Folder Properties"
+                $OpenToFolder = New-Object $MenuItemObject
+                $OpenToFolder.Text = "Open To Folder"
                 # Defines the Context menu within the listbox
                 $ListBox.ContextMenu = $contextmenuService
-
-                # Add Menu Items to the Context Menu
+                # Add Items to the Context Menu
                 $contextmenuService.MenuItems.Add($OpenWithVSCode)  # Add the VSCode menu item
-                $contextmenuService.Items.Add('-') # Adds a seperator
-                $contextmenuService.MenuItems.Add($OpenFolderProperties) # Add the Folder Properties menu item
+                $contextmenuService.MenuItems.Add('-') # Adds a seperator
+                $contextmenuService.MenuItems.Add($OpenToFolder) # Add the Folder Properties menu item
             } elseif($ListBox.SelectedIndex -eq -1) {
                 $ListBox.ContextMenu = $null    # If no item is selected, then remove the context menu
             }
-
             # If VSCode is selected, then open the selected item in VSCode
             $OpenWithVSCode.add_Click({
                 try{
-                    Start-Process -FilePath "C:\Users\panze\AppData\Local\Programs\Microsoft VS Code\Code.exe" $ListBox.SelectedItem
+                    # Need to 
+                    Start-Process -FilePath $VSPath $ListBox.SelectedItem
                 }catch {
                     # If Start-Process fails, then show the console and display the error
                     Show-Console
@@ -222,11 +224,12 @@ $ListBox = New-Object $ListBoxObject
                     Read-Host
                 }
             })
-            # If Folder Properties is selected, then open the selected items (which is $ListBox.SelectedItem containting a path) Folder Properties
-            $OpenFolderProperties.add_Click({
+            # If Folder Properties is selected, then open the selectedItem Folder Properties
+            $OpenToFolder.add_Click({
                 try{
-                    Start-Process -FilePath "explorer.exe" $ListBox.SelectedItem
-                }catch {
+                    $FolderPath = $ListBox.SelectedItem
+                    Start-Process -FilePath explorer.exe "/select, $FolderPath"
+                   }catch {
                     # If Start-Process fails, then show the console and display the error
                     Show-Console
                     Write-Error $_.Exception

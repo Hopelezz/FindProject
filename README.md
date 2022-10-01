@@ -98,9 +98,9 @@ More information on execution policies can be found [here](https://docs.microsof
 
 - [x] Create a function that will search for a file in a given directory and 1 subdirectory.
 - [x] Create a Graphical User Interface (GUI) for the function.
-    - [x] Input field for the file name.
-    - [x] Search Button to run the function.
-    - [x] ListBox to display the results.
+  - [x] Input field for the file name.
+  - [x] Search Button to run the function.
+  - [x] ListBox to display the results.
 
 Improvements:
 - [x] Pressing `Enter` in the input field should run the function.
