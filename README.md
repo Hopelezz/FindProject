@@ -71,7 +71,7 @@ This is a simple Folder Finder app. There are two scripts provided both built-in
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To run the projects you will need to follow the instructions below. This will run a localhost version of the website.
+To run the scripts you will need to follow the instructions below.
 
 ### Installation
 
