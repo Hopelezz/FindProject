@@ -110,6 +110,7 @@ Improvements:
 - [x] Add `Warning` if the file is not found.
 - [x] Add `Try/Catch` to handle errors.
 - [x] Add `ContextMenu` to open Path in VS Code
+- [x] Add Keybind `Ctrl + Enter` to search C:\ drive.
 
 See the [open issues](https://github.com/Hopelezz/FindProject/issues) for a full list of proposed features (and known issues).
 

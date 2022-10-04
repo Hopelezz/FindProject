@@ -164,10 +164,24 @@ $SearchButton = New-Object $ButtonObject
     })
     # if enter is pressed, click the search button
     $SearchBox.Add_KeyDown({
-        IF($_.KeyCode -eq "Enter") {
-            $SearchButton.PerformClick()
-        }
+        TRY {
+            IF($_.KeyCode -eq [System.Windows.Forms.Keys]::Enter) {
+                $SearchButton.PerformClick()
+            }
+            # If CTRL+Enter is pressed set dirPath to C:\ and click the search button
+            IF($_.KeyCode -eq "Enter" -and $_.Control) {
+                $dirPath = "C:\"
+                $SearchButton.PerformClick()
+            }
+        } CATCH {
+            # If Search-Project fails, then show the console and display the error
+            Show-Console
+            Write-Error $_.Exception
+            Read-Host
+        }        
     })
+    
+   
 
 $ClearButton = New-Object $ButtonObject
     $ClearButton.Location = New-Object System.Drawing.Point(100, 90)
