@@ -88,7 +88,7 @@ FUNCTION Search-Project {
 # FindTree # Call FindTree function
 
 #Function for Handling Errors
-FUNCTION ErrorLogger {
+FUNCTION LogError {
     # Show the console window
     Show-Console
     # Display the error message
@@ -168,7 +168,7 @@ $SearchButton = New-Object $ButtonObject
         TRY {
             Search-Project -ProjectName $SearchBox.Text
         } CATCH {
-            ErrorLogger
+            LogError
         }
     })
     # if enter is pressed, click the search button
@@ -183,12 +183,9 @@ $SearchButton = New-Object $ButtonObject
                 $SearchButton.PerformClick()
             }
         } CATCH {
-            ErrorLogger
+            LogError
         }        
     })
-    
-   
-
 $ClearButton = New-Object $ButtonObject
     $ClearButton.Location = New-Object System.Drawing.Point(100, 90)
     $ClearButton.AutoSize = $true
@@ -214,7 +211,7 @@ $ListBox = New-Object $ListBoxObject
         TRY {
             Start-Process  $ListBox.SelectedItem
         } CATCH {
-            ErrorLogger
+            LogError
         }
     })
     # Enter to open the selected item
@@ -223,7 +220,7 @@ $ListBox = New-Object $ListBoxObject
             TRY {
                 Start-Process  $ListBox.SelectedItem
             } CATCH {
-                ErrorLogger
+                LogError
             }
         }
     })
@@ -250,10 +247,9 @@ $ListBox = New-Object $ListBoxObject
             # If VSCode is selected, then open the selected item in VSCode
             $OpenWithVSCode.add_Click({
                 TRY{
-                    # Need to 
                     Start-Process -FilePath $VSPath $ListBox.SelectedItem
                 } CATCH {
-                    ErrorLogger
+                    LogError
                 }
             })
             # If Folder Properties is selected, then open the selectedItem Folder Properties
@@ -262,7 +258,7 @@ $ListBox = New-Object $ListBoxObject
                     $FolderPath = $ListBox.SelectedItem
                     Start-Process -FilePath explorer.exe "/select, $FolderPath"
                 } CATCH {
-                    ErrorLogger
+                    LogError
                 }
             })
         }
