@@ -87,7 +87,19 @@ FUNCTION Search-Project {
 # 
 # FindTree # Call FindTree function
 
-
+#Function for Handling Errors
+FUNCTION ErrorLogger {
+    # Show the console window
+    Show-Console
+    # Display the error message
+    Write-Error $_.Exception.Message
+    # Log the error to a file in the same directory as the script
+    $error | Out-File -FilePath (Split-Path $MyInvocation.MyCommand.Path) + "\ErrorLog.txt" -Append
+    # Pause the script
+    Read-Host -Prompt "Press Enter to continue..."
+    # Close the script
+    Exit
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # The following code is used to create a GUI for the script.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -156,10 +168,7 @@ $SearchButton = New-Object $ButtonObject
         TRY {
             Search-Project -ProjectName $SearchBox.Text
         } CATCH {
-            # If Search-Project fails, then show the console and display the error
-            Show-Console
-            Write-Error $_.Exception
-            Read-Host
+            ErrorLogger
         }
     })
     # if enter is pressed, click the search button
@@ -174,10 +183,7 @@ $SearchButton = New-Object $ButtonObject
                 $SearchButton.PerformClick()
             }
         } CATCH {
-            # If Search-Project fails, then show the console and display the error
-            Show-Console
-            Write-Error $_.Exception
-            Read-Host
+            ErrorLogger
         }        
     })
     
@@ -208,10 +214,7 @@ $ListBox = New-Object $ListBoxObject
         TRY {
             Start-Process  $ListBox.SelectedItem
         } CATCH {
-            # If Start-Process fails, then show the console and display the error
-            Show-Console
-            Write-Error $_.Exception
-            Read-Host
+            ErrorLogger
         }
     })
     # Enter to open the selected item
@@ -220,10 +223,7 @@ $ListBox = New-Object $ListBoxObject
             TRY {
                 Start-Process  $ListBox.SelectedItem
             } CATCH {
-                # If Start-Process fails, then show the console and display the error
-                Show-Console
-                Write-Error $_.Exception
-                Read-Host
+                ErrorLogger
             }
         }
     })
@@ -253,10 +253,7 @@ $ListBox = New-Object $ListBoxObject
                     # Need to 
                     Start-Process -FilePath $VSPath $ListBox.SelectedItem
                 } CATCH {
-                    # If Start-Process fails, then show the console and display the error
-                    Show-Console
-                    Write-Error $_.Exception
-                    Read-Host
+                    ErrorLogger
                 }
             })
             # If Folder Properties is selected, then open the selectedItem Folder Properties
@@ -264,11 +261,8 @@ $ListBox = New-Object $ListBoxObject
                 TRY {
                     $FolderPath = $ListBox.SelectedItem
                     Start-Process -FilePath explorer.exe "/select, $FolderPath"
-                   } CATCH {
-                    # If Start-Process fails, then show the console and display the error
-                    Show-Console
-                    Write-Error $_.Exception
-                    Read-Host
+                } CATCH {
+                    ErrorLogger
                 }
             })
         }

@@ -58,7 +58,7 @@ This is a simple Folder Finder app. There are two scripts provided both built-in
 - `FindProjectGui.ps1` is a Graphical User Interface.
 <br />
 
-![image](https://user-images.githubusercontent.com/72772558/192170170-e65e15b4-c8f7-409c-a167-6257a93a41a5.png)
+![image](https://user-images.githubusercontent.com/72772558/193422677-754c72cc-d0aa-4630-a42d-b701f081669a.png)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -71,7 +71,7 @@ This is a simple Folder Finder app. There are two scripts provided both built-in
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To run the projects you will need to follow the instructions below. This will run a localhost version of the website.
+To run the scripts you will need to follow the instructions below.
 
 ### Installation
 
@@ -105,12 +105,17 @@ More information on execution policies can be found [here](https://docs.microsof
 Improvements:
 - [x] Pressing `Enter` in the input field should run the function.
 - [x] Double-clicking on a result should open the file.
-- [x] Add a `Clear` button to clear the input field.
+- [x] Add `Clear` button to clear the input field.
 - [x] Add `Warning` if the input is empty or under 3 characters.
 - [x] Add `Warning` if the file is not found.
 - [x] Add `Try/Catch` to handle errors.
 - [x] Add `ContextMenu` to open Path in VS Code
 - [x] Add Keybind `Ctrl + Enter` to search C:\ drive.
+- [x] Refactor Code to simplify and remove unused code. 
+- [ ] Add `Properties` menu to `ContextMenu` to open folder Properties.
+  - This is rather complicated since (Start-Process -FilePath Explorer.exe "/select, $FolderPath") doesn't work, but it will Open To Folder and select it.
+- [ ] Add function to search paths from Tree.txt.
+  - Tree.txt is created from function FindTree{} and placed at $dirPath. The idea is to reduce the search impact on servers to once a day for the first user to search.
 
 See the [open issues](https://github.com/Hopelezz/FindProject/issues) for a full list of proposed features (and known issues).
 
