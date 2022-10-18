@@ -1,8 +1,11 @@
 # Change these to match your environment
 # Defines Default Folder Path
-$dirPath = "E:\" 
+$dirPath = "E:\"
+$ctrlDirPath = "D:\"
 # Defines Visual Studio Path
-$VSPath = "C:\Users\panze\AppData\Local\Programs\Microsoft VS Code\Code.exe" 
+$VSPath = "C:\Users\panze\AppData\Local\Programs\Microsoft VS Code\Code.exe"
+# Define the scripts path for error handling
+$LogRoot = "E:\CodeBase\FindProject\GUI\LOG\"
 
 # Adds console controls to the script
 Add-Type -Name Window -Namespace Console -MemberDefinition '
@@ -93,9 +96,15 @@ FUNCTION LogError {
     Show-Console
     # Display the error message
     Write-Error $_.Exception.Message
-    # Log the error to a file in the same directory as the script
-    $error | Out-File -FilePath (Split-Path $MyInvocation.MyCommand.Path) + "\ErrorLog.txt" -Append
-    # Pause the script
+    #$Error = $_.Exception.Message
+    # Create a log file if it doesn't exist
+    IF(!(Test-Path $LogRoot + "ErrorLog.txt")) {
+        New-Item $LogRoot + "ErrorLog.txt" -ItemType File
+    }
+    # Write the error to the log file
+    Start-Transcript -Path $LogRoot + "ErrorLog.txt" -Append
+    Write-Host $LogRoot + "ErrorLog.txt"
+    # Print the error to the console
     Read-Host -Prompt "Press Enter to continue..."
     # Close the script
     Exit
@@ -179,7 +188,7 @@ $SearchButton = New-Object $ButtonObject
             }
             # If CTRL+Enter is pressed set dirPath to C:\ and click the search button
             IF($_.KeyCode -eq "Enter" -and $_.Control) {
-                $dirPath = "C:\"
+                $dirPath = $ctrlDirPath
                 $SearchButton.PerformClick()
             }
         } CATCH {
@@ -208,11 +217,17 @@ $ListBox = New-Object $ListBoxObject
     [System.Windows.Forms.AnchorStyles]::Top
     # Double click to open the selected item
     $ListBox.add_DoubleClick({
-        TRY {
-            Start-Process  $ListBox.SelectedItem
-        } CATCH {
-            LogError
+        IF($ListBox.SelectedIndex -ne -1){
+            TRY {
+                Start-Process  $ListBox.SelectedItem
+            } CATCH {
+                LogError
+            } 
+        } ELSE{
+            $WarningLabel.Text = "Please select a folder to open"
+            $WarningLabel.Visible = $true
         }
+        
     })
     # Enter to open the selected item
     $ListBox.add_KeyDown({
