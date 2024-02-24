@@ -1,37 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Define the style for the header -->
-    <Style x:Key="HeaderStyle" TargetType="Border">
-        <Setter Property="Background" Value="LightGray"/>
-    </Style>
-
-    <!-- Define the style for the text -->
-    <Style x:Key="TextStyle" TargetType="TextBlock">
-        <Setter Property="Foreground" Value="Black"/>
-    </Style>
-
-    <!-- Define the style for the tab items -->
-    <Style x:Key="TabItemStyle" TargetType="TabItem">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
-    </Style>
-
-    <!-- Define the style for the buttons -->
-    <Style x:Key="ButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
-    </Style>
-
-    <!-- Define the style for the ComboBox -->
-    <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
-    </Style>
-
-    <!-- Define the style for the TextBox -->
-    <Style x:Key="TextBoxStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="White"/>
-        <Setter Property="Foreground" Value="Black"/>
-    </Style>
+    <SolidColorBrush x:Key="PrimaryBackground" Color="White"/>
+    <SolidColorBrush x:Key="PrimaryForeground" Color="Black"/>
 </ResourceDictionary>
 

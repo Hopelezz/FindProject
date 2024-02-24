@@ -22,8 +22,6 @@ namespace Find_Project
     {
         public MainWindow()
         {
-            ChangeTheme("DarkTheme"); // Set a default theme
-
             InitializeComponent();
         }
         private void ChangeTheme(string newTheme)
@@ -32,7 +30,18 @@ namespace Find_Project
             var dict = new ResourceDictionary();
 
             //set the source of the dictionary to the theme file
-            dict.Source = new Uri("Themes/" + newTheme + ".xaml", UriKind.Relative);
+            switch (newTheme)
+            {
+                case "LightTheme":
+                    dict.Source = new Uri("Themes/LightTheme.xaml", UriKind.Relative);
+                    break;
+                case "DarkTheme":
+                    dict.Source = new Uri("Themes/DarkTheme.xaml", UriKind.Relative);
+                    break;
+                default:
+                    dict.Source = new Uri("Themes/LightTheme.xaml", UriKind.Relative);
+                    break;
+            }
 
             //remove the old theme and add the new one
             Application.Current.Resources.MergedDictionaries.Clear();
@@ -40,12 +49,12 @@ namespace Find_Project
         }
         private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var comboBox = (ComboBox)sender;
-            var selectedTheme = (string)((ComboBoxItem)comboBox.SelectedItem).Content;
-
-            ChangeTheme(selectedTheme);
+            var theme = ((ComboBoxItem)((ComboBox)sender).SelectedItem).Content.ToString();
+            ChangeTheme(theme);
+            //Todo: maybe null
         }
-                private void CloseButton_Click(object sender, RoutedEventArgs e)
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }

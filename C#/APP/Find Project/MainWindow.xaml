@@ -8,6 +8,30 @@
         
         mc:Ignorable="d"
         Title="Find Project" Height="600" Width="1080" WindowStartupLocation="CenterScreen" WindowStyle="none" Foreground="White">
+    <Window.Resources>
+        <SolidColorBrush x:Key="PrimaryBackground" Color="White"/>
+        <SolidColorBrush x:Key="PrimaryForeground" Color="Black"/>
+        <SolidColorBrush x:Key="AccentColor" Color="#FF254CE2"/>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
+            <Setter Property="Background" Value="{StaticResource PrimaryBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryForeground}"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
+            <Setter Property="Background" Value="{StaticResource AccentColor}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
+        </Style>
+        <Style TargetType="ListBox">
+            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
+            <Setter Property="Background" Value="{StaticResource PrimaryBackground}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource PrimaryForeground}"/>
+        </Style>
+    </Window.Resources>
     <Window.Template>
         <ControlTemplate TargetType="{x:Type Window}">
             <Grid>
@@ -21,7 +45,7 @@
                         <Button Content="X" Width="30" Click="CloseButton_Click"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Row="1" Background="{TemplateBinding Background}">
+                <Border Grid.Row="1" Background="{DynamicResource PrimaryBackground}">
                     <AdornerDecorator>
                         <ContentPresenter/>
                     </AdornerDecorator>
