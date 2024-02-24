@@ -156,3 +156,6 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+/C#/.vs
+/C#/APP/.vs
+/C#/APP/Find Project/.vs
