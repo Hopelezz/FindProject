@@ -15,10 +15,10 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border Style="{StaticResource HeaderStyle}" Padding="10">
+                <Border  Padding="10">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="_" Width="30" Style="{StaticResource ButtonStyle}" Click="MinimizeButton_Click" Margin="0,0,10,0"/>
-                        <Button Content="X" Width="30" Style="{StaticResource ButtonStyle}" Click="CloseButton_Click"/>
+                        <Button Content="_" Width="30" Click="MinimizeButton_Click" Margin="0,0,10,0"/>
+                        <Button Content="X" Width="30" Click="CloseButton_Click"/>
                     </StackPanel>
                 </Border>
                 <Border Grid.Row="1" Background="{TemplateBinding Background}">
