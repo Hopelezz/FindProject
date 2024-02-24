@@ -31,35 +31,35 @@
     </Window.Template>
     <Grid>
         <TabControl>
-            <TabItem Header="Search" Style="{StaticResource TabItemStyle}">
+            <TabItem Header="Search" >
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Margin="10">
-                        <TextBox x:Name="searchTextBox" Width="200" Margin="0,0,10,0" Style="{StaticResource TextBoxStyle}" MaxLength="50"/>
-                        <Button x:Name="searchButton" Content="Search" Style="{StaticResource ButtonStyle}"/>
+                        <TextBox x:Name="searchTextBox" Width="200" Margin="0,0,10,0" MaxLength="50"/>
+                        <Button x:Name="searchButton" Content="Search" />
                     </StackPanel>
                     <ListBox x:Name="resultsListBox" Grid.Row="1" Margin="10">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}" Style="{StaticResource TextStyle}"/>
+                                <TextBlock Text="{Binding}" />
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="Settings" Style="{StaticResource TabItemStyle}">
+            <TabItem Header="Settings" >
                 <StackPanel Margin="10">
-                    <TextBlock Text="Customization Options:" FontWeight="Bold" Style="{StaticResource TextStyle}"/>
+                    <TextBlock Text="Customization Options:" FontWeight="Bold" />
                     <ComboBox x:Name="ThemeComboBox" SelectionChanged="ThemeComboBox_SelectionChanged">
                         <ComboBoxItem>LightTheme</ComboBoxItem>
                         <ComboBoxItem>DarkTheme</ComboBoxItem>
                     </ComboBox>
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                        <Label Content="Enter a number:" Style="{StaticResource TextStyle}"/>
-                        <TextBox x:Name="inputTextBox" Width="50" Style="{StaticResource TextBoxStyle}"/>
+                        <Label Content="Enter a number:" />
+                        <TextBox x:Name="inputTextBox" Width="50" />
                     </StackPanel>
                 </StackPanel>
             </TabItem>
