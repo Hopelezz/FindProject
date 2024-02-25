@@ -117,6 +117,13 @@ Improvements:
 - [ ] Add function to search paths from Tree.txt.
   - Tree.txt is created from function FindTree{} and placed at $dirPath. The idea is to reduce the search impact on servers to once a day for the first user to search.
 - [ ] Create a C# version to create a `.exe` version
+  - [ ] User Feedback: Provide more feedback to the user during the search process. For example, can show a loading spinner while the search is in progress or disable the search button during the search to prevent multiple simultaneous searches.
+  - [ ] Asynchronous Search: Due to potentially long wait times for large directory structure, could performing the search operation asynchronously to keep UI responsive. Can use async-await pattern for this.
+  - [ ] Enhanced UI: Can improve the UI by adding features like sorting the search results, displaying project details when a project is selected (Maybe tooltip?), or providing options for opening projects directly from the application.
+  - [ ] Customization Options: Options for the user to customize the search criteria, such as searching by file type, file size, creation/modification date, etc.
+  - [ ] Setting Menu to enable features
+    -  [ ] Localization: to support different regions. Could use AI or a translate software
+    -  [ ] Configurability: Instead of hardcoding the minimum length requirement for the search term (3). This allows users or administrators to adjust the behavior of the application according to their preferences.
 
 See the [open issues](https://github.com/Hopelezz/FindProject/issues) for a full list of proposed features (and known issues).
 
