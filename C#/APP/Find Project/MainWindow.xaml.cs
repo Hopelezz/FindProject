@@ -28,12 +28,13 @@ namespace Find_Project
         // SEARCH FUNCTIONS
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if(dirPath == null || dirPathCtrl == null)
+            if (dirPath == null || dirPathCtrl == null)
             {
                 MessageBox.Show("Please set the default and alternate directory paths in settings.");
                 return;
             }
-            else {
+            else
+            {
                 // Control + Enter to search in alternate directory
                 if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Enter)
                 {
