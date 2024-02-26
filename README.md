@@ -114,16 +114,22 @@ Improvements:
 - [x] Refactor Code to simplify and remove unused code. 
 - [ ] Add `Properties` menu to `ContextMenu` to open folder Properties.
   - This is rather complicated since (Start-Process -FilePath Explorer.exe "/select, $FolderPath") doesn't work, but it will Open To Folder and select it.
-- [ ] Add function to search paths from Tree.txt.
   - Tree.txt is created from function FindTree{} and placed at $dirPath. The idea is to reduce the search impact on servers to once a day for the first user to search.
-- [ ] Create a C# version to create a `.exe` version
-  - [ ] User Feedback: Provide more feedback to the user during the search process. For example, can show a loading spinner while the search is in progress or disable the search button during the search to prevent multiple simultaneous searches.
-  - [ ] Asynchronous Search: Due to potentially long wait times for large directory structure, could performing the search operation asynchronously to keep UI responsive. Can use async-await pattern for this.
-  - [ ] Enhanced UI: Can improve the UI by adding features like sorting the search results, displaying project details when a project is selected (Maybe tooltip?), or providing options for opening projects directly from the application.
-  - [ ] Customization Options: Options for the user to customize the search criteria, such as searching by file type, file size, creation/modification date, etc.
-  - [ ] Setting Menu to enable features
-    -  [ ] Localization: to support different regions. Could use AI or a translate software
-    -  [ ] Configurability: Instead of hardcoding the minimum length requirement for the search term (3). This allows users or administrators to adjust the behavior of the application according to their preferences.
+     
+C# APP
+- [x] Create a base WPF Winform version.
+- [ ] User Feedback: Provide more feedback to the user during the search process. For example, can show a loading spinner while the search is in progress or disable the search button during the search to prevent multiple simultaneous searches.
+- [x] Asynchronous Search: Due to potentially long wait times for large directory structures, could perform the search operation asynchronously to keep UI responsive. Can use an async-await pattern for this. [Note: this has personally improved the search delay significantly over the Powershell version for large folder structures]
+- [ ] Enhanced UI: Can improve the UI by adding features like:
+  - [ ] Sort functions
+  - [ ] Displaying folder details (Maybe add tooltips that access metadata?)
+- [ ] Setting Menu to enable features
+  - [x] Add customizable Default Path
+  - [x] Add customizable Ctrl + Enter Path
+  - [ ] Add search criteria, such as searching by file type, file size, creation/modification date, etc. (Not sure if I want to do this)
+  - [ ] Add a dedicated path within the folder that opens. For example, if all folders have the same folder architecture could set an additional dedicated path like [path] + [results] +`\\Design\\Controls`
+  - [ ] Localization: to support different regions. Could use AI or translation software [Note: Not a lot to convert if any]
+  - [ ] Configurability: Instead of hardcoding the minimum length requirement for the search term (3). This allows users or administrators to adjust the behavior of the application according to their preferences.
 
 See the [open issues](https://github.com/Hopelezz/FindProject/issues) for a full list of proposed features (and known issues).
 
@@ -132,7 +138,7 @@ See the [open issues](https://github.com/Hopelezz/FindProject/issues) for a full
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
