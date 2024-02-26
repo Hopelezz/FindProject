@@ -14,7 +14,6 @@ namespace Find_Project
 
         private string dirPath; // Default dirPath
         private string dirPathAlt = @"D:\"; // Alternate directory path for Alt+Enter search
-        private string vsPath = @"C:\Users\panze\AppData\Local\Programs\Microsoft VS Code\Code.exe";
         private string settingsFilePath = @"C:\TEMP\FindProjectSetting.txt";
         private string defaultPath;
 
@@ -26,16 +25,16 @@ namespace Find_Project
         {
             InitializeComponent();
             LoadSettings();
-            InitializeThemes();
+            //InitializeThemes();
         }
 
 
-        private void InitializeThemes()
-        {
-            // Populate themeComboBox with available themes
-            List<string> themes = new List<string> { "Light", "Dark" }; // Add your themes here
-            themeComboBox.ItemsSource = themes;
-        }
+//       private void InitializeThemes()
+//       {
+//           // Populate themeComboBox with available themes
+//          List<string> themes = new List<string> { "Light", "Dark" }; // Add your themes here
+//          themeComboBox.ItemsSource = themes;
+//       }
 
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)
         {
@@ -69,35 +68,27 @@ namespace Find_Project
             PerformSearch();
         }
 
-        private void PerformSearch()
+        private async void PerformSearch()
         {
             try
             {
-                string query = searchBox.Text.Trim();
+                Search search = new Search();
+                List<string> results = await search.SearchFoldersAsync(searchBox.Text, dirPath);
 
-                // Check if the search query length exceeds the limit
-                if (query.Length < 3)
+                listBox.Items.Clear(); // Clear existing items before adding new ones
+                foreach (string result in results)
                 {
-                    // Display warning about minimum character limit
-                    warningLabel.Content = "Minimum of 3 characters required for search.";
-                    return; // Exit the method
+                    // Prepend the default path back to the relative path
+                    string fullPath = Path.Combine(dirPath, result);
+                    listBox.Items.Add(fullPath);
                 }
-
-                // Perform the search operation
-                lastSearchResult = search.SearchFolders(query, dirPath);
-                UpdateListBox(lastSearchResult);
-
-                // Clear any previous warnings
-                warningLabel.Content = null;
             }
             catch (ArgumentException ex)
             {
-                // Display warning above the list box
                 warningLabel.Content = ex.Message;
             }
             catch (Exception ex)
             {
-                // Handle other exceptions
                 MessageBox.Show("An error occurred: " + ex.Message);
             }
         }

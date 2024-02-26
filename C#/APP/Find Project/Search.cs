@@ -1,63 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Find_Project
 {
     public class Search
     {
-        public string dirPath = @"E:\";
-        public string logPath = @"C:\TEMP\FindProject\ErrorLog.txt";
-        public string dirPath2 = @"D:\"; // Directory path for Alt+Enter search
-
-        public List<string> SearchFolders(string query, string dirPath)
-        {
-            // Ensure dirPath is not null or empty
-            if (string.IsNullOrEmpty(dirPath))
-            {
-                throw new ArgumentException("Directory path cannot be null or empty.");
-            }
-
-            List<string> results = new List<string>();
-
-           
-            // Perform search in the specified directory path
-            string[] directories = Directory.GetDirectories(dirPath, $"*{query}*");
-
-            foreach (string directory in directories)
-            {
-                // Get the folder name
-                string folderName = Path.GetFileName(directory);
-                results.Add(folderName);
-            }
-
-            return results;
-        }
-
-        public List<string> SearchFoldersAltEnter()
+        public async Task<List<string>> SearchFoldersAsync(string query, string dirPath)
         {
             List<string> results = new List<string>();
 
-            // Perform search in the alternate directory path
-            string[] directories = Directory.GetDirectories(dirPath2);
-
-            foreach (string directory in directories)
+            // Check if the query contains at least 3 characters
+            if (query.Length < 3)
             {
-                // Get the folder name
-                string folderName = Path.GetFileName(directory);
-                results.Add(folderName);
+                throw new ArgumentException("Input must contain at least 3 characters");
             }
+
+            await Task.Run(() =>
+            {
+                // Filter for folders and add to results list
+                string[] folders = Directory.GetDirectories(dirPath, "*" + query + "*", SearchOption.AllDirectories);
+                foreach (string folder in folders)
+                {
+                    // Get relative path by removing the default path
+                    string relativePath = folder.Replace(dirPath, "");
+                    results.Add(relativePath);
+                }
+
+                // Sort the results list alphanumerically
+                results.Sort();
+            });
 
             return results;
-        }
-
-        public void LogError(Exception ex)
-        {
-            // Log the error to the specified log file
-            using (StreamWriter writer = new StreamWriter(logPath, true))
-            {
-                writer.WriteLine($"[{DateTime.Now}] {ex.Message}");
-            }
         }
     }
 }
