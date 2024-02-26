@@ -1,91 +1,41 @@
 ﻿<Window x:Class="Find_Project.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Find_Project"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        
-        mc:Ignorable="d"
-        Title="Find Project" Height="600" Width="1080" WindowStartupLocation="CenterScreen" WindowStyle="none" Foreground="White">
-    <Window.Resources>
-        <SolidColorBrush x:Key="PrimaryBackground" Color="White"/>
-        <SolidColorBrush x:Key="PrimaryForeground" Color="Black"/>
-        <SolidColorBrush x:Key="AccentColor" Color="#FF254CE2"/>
-
-        <Style TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
-        </Style>
-        <Style TargetType="TextBox">
-            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
-            <Setter Property="Background" Value="{StaticResource PrimaryBackground}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource PrimaryForeground}"/>
-        </Style>
-        <Style TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
-            <Setter Property="Background" Value="{StaticResource AccentColor}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource AccentColor}"/>
-        </Style>
-        <Style TargetType="ListBox">
-            <Setter Property="Foreground" Value="{StaticResource PrimaryForeground}"/>
-            <Setter Property="Background" Value="{StaticResource PrimaryBackground}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource PrimaryForeground}"/>
-        </Style>
-    </Window.Resources>
-    <Window.Template>
-        <ControlTemplate TargetType="{x:Type Window}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Border  Padding="10">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="_" Width="30" Click="MinimizeButton_Click" Margin="0,0,10,0"/>
-                        <Button Content="X" Width="30" Click="CloseButton_Click"/>
-                    </StackPanel>
-                </Border>
-                <Border Grid.Row="1" Background="{DynamicResource PrimaryBackground}">
-                    <AdornerDecorator>
-                        <ContentPresenter/>
-                    </AdornerDecorator>
-                </Border>
-            </Grid>
-        </ControlTemplate>
-    </Window.Template>
+        Title="Your App" Height="450" Width="800" ResizeMode="CanResizeWithGrip" WindowStartupLocation="CenterScreen">
     <Grid>
         <TabControl>
-            <TabItem Header="Search" >
+            <!-- Search Tab -->
+            <TabItem Header="Search">
                 <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-                    <StackPanel Orientation="Horizontal" Margin="10">
-                        <TextBox x:Name="searchTextBox" Width="200" Margin="0,0,10,0" MaxLength="50"/>
-                        <Button x:Name="searchButton" Content="Search" />
-                    </StackPanel>
-                    <ListBox x:Name="resultsListBox" Grid.Row="1" Margin="10">
+                    <TextBox x:Name="searchBox" Margin="10" VerticalAlignment="Top" KeyDown="SearchBox_KeyDown"/>
+                    <Button Content="Search" Click="SearchButton_Click" Margin="10,40,10,10" VerticalAlignment="Top" />
+                    <ListBox x:Name="listBox" Margin="10,106,10,10" SelectionChanged="ListBox_SelectionChanged">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}" />
+                                <TextBlock Text="{Binding}">
+
+                                </TextBlock>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
+                    <Label x:Name="warningLabel" Content="" Foreground="Red" Margin="10,77,10,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Settings" >
-                <StackPanel Margin="10">
-                    <TextBlock Text="Customization Options:" FontWeight="Bold" />
-                    <ComboBox x:Name="ThemeComboBox" SelectionChanged="ThemeComboBox_SelectionChanged">
-                        <ComboBoxItem>LightTheme</ComboBoxItem>
-                        <ComboBoxItem>DarkTheme</ComboBoxItem>
-                    </ComboBox>
-                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                        <Label Content="Enter a number:" />
-                        <TextBox x:Name="inputTextBox" Width="50" />
-                    </StackPanel>
-                </StackPanel>
+            <!-- Settings Tab -->
+            <TabItem Header="Settings">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Default Path:" Margin="10" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+                    <TextBox x:Name="defaultPathTextBox" Margin="10" VerticalAlignment="Top" Grid.Column="1"/>
+                    <!--                   
+                    <Label Content="Theme:" Margin="0,39,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Grid.Column="0"/>
+                    <ComboBox x:Name="themeComboBox" Margin="10,39,10,0" VerticalAlignment="Top" Grid.Column="1"/>
+                    -->
+                    <Button Content="Save" Click="SaveButton_Click" Margin="10,344,10,0" VerticalAlignment="Top" Grid.Column="1"/>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>
