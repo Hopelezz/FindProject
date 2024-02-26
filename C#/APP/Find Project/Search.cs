@@ -9,7 +9,7 @@ namespace Find_Project
     {
         public static async Task<List<string>> SearchFoldersAsync(string query, string dirPath)
         {
-            List<string> results = new();
+            List<string> results = new List<string>();
 
             // Check if the query contains at least 3 characters
             if (query.Length < 3)
@@ -21,28 +21,7 @@ namespace Find_Project
             {
                 await Task.Run(() =>
                 {
-                    foreach (var directory in Directory.EnumerateDirectories(dirPath))
-                    {
-                        try
-                        {
-                            // Filter for folders and add to results list
-                            string[] folders = Directory.GetDirectories(directory, "*" + query + "*", SearchOption.AllDirectories);
-                            foreach (string folder in folders)
-                            {
-                                // Get relative path by removing the default path
-                                string relativePath = folder.Replace(dirPath, "");
-                                results.Add(relativePath);
-                            }
-                        }
-                        catch (UnauthorizedAccessException)
-                        {
-                            // Skip folders that the user doesn't have access to
-                            continue;
-                        }
-                    }
-
-                    // Sort the results list alphanumerically
-                    results.Sort();
+                    SearchInLevel(results, dirPath, query, 0, "");
                 });
             }
             catch (Exception ex)
@@ -52,6 +31,36 @@ namespace Find_Project
             }
 
             return results;
+        }
+
+        private static void SearchInLevel(List<string> results, string dirPath, string query, int level, string currentRelativePath)
+        {
+            if (level > 1) // Limit search to two levels deep
+                return;
+
+            try
+            {
+                foreach (var directory in Directory.EnumerateDirectories(dirPath))
+                {
+                    // Check if the directory name contains the query string
+                    if (directory.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Get the relative path of the directory
+                        string relativePath = Path.Combine(currentRelativePath, Path.GetFileName(directory));
+
+                        // Add the relative path to the results list
+                        results.Add(relativePath);
+                    }
+
+                    // Recursively search in the next level
+                    SearchInLevel(results, directory, query, level + 1, Path.Combine(currentRelativePath, Path.GetFileName(directory)));
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Skip directories that the user doesn't have access to
+                return;
+            }
         }
     }
 }

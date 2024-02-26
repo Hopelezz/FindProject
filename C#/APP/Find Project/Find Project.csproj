@@ -6,10 +6,20 @@
     <RootNamespace>Find_Project</RootNamespace>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <AssemblyName></AssemblyName>
+    <ApplicationIcon>Resources\Seeker.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\seeker.ico" />
+    <None Remove="Seeker.ico" />
+    <None Remove="Seeker.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Seeker.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -18,6 +28,8 @@
 
   <ItemGroup>
     <Resource Include="Resources\seeker.ico" />
+    <Resource Include="Seeker.ico" />
+    <Resource Include="Seeker.png" />
   </ItemGroup>
 
   <ItemGroup>
