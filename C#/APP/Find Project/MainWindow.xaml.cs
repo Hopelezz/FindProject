@@ -38,28 +38,28 @@ namespace Find_Project
                 // Control + Enter to search in alternate directory
                 if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Enter)
                 {
-                    PerformSearch(dirPathCtrl);
+                    PerformSearch(dirPathCtrl, "dirPathCtrl");
                 }
                 else if (e.Key == Key.Enter)
                 {
-                    PerformSearch(dirPath);
+                    PerformSearch(dirPath, "dirPath");
                 }
             }
         }
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            PerformSearch(dirPath);
+            PerformSearch(dirPath, "dirPath");
         }
 
-        private async void PerformSearch(string path)
+        private async void PerformSearch(string path, string searchContext)
         {
             try
             {
                 Search search = new();
                 List<string> results = await Search.SearchFoldersAsync(searchBox.Text, path);
 
-                UpdateListBox(results);
+                UpdateListBox(results, searchContext);
                 // Remove any previous warning messages
                 warningLabel.Content = "";
             }
@@ -67,7 +67,6 @@ namespace Find_Project
             {
                 // Set warning message
                 warningLabel.Content = "Access denied. Try running the application as an administrator.";
-
             }
             catch (ArgumentException ex)
             {
@@ -77,21 +76,19 @@ namespace Find_Project
             {
                 MessageBox.Show("An error occurred: " + ex.Message);
             }
-
         }
-
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (listBox.SelectedItem is string selectedItem)
+            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
-                // Get the full path of the selected folder
-                string fullPath = Path.Combine(dirPath, selectedItem);
+                // Get the full path using metadata from ListBoxItemMetadata
+                string fullPath = Path.Combine(selectedItem.SearchContext == "dirPathCtrl" ? dirPathCtrl : dirPath, selectedItem.Text);
 
                 try
                 {
-                    // Open the selected folder
-                    Process.Start("explorer.exe", fullPath);
+                    // Open the folder or navigate to it if already open
+                    OpenFolder(fullPath);
                 }
                 catch (Exception ex)
                 {
@@ -101,28 +98,43 @@ namespace Find_Project
             }
         }
 
-        private void UpdateListBox(List<string> results)
+        private void UpdateListBox(List<string> results, string searchContext)
         {
             listBox.Items.Clear(); // Clear existing items before adding new ones
             foreach (string result in results)
             {
-                // Prepend the default path back to the relative path
-                string fullPath = Path.Combine(dirPath, result);
-                listBox.Items.Add(fullPath);
+                // Add the result along with its search context as a hidden item
+                listBox.Items.Add(new ListBoxItemMetadata(result, searchContext));
+            }
+        }
+
+        public class ListBoxItemMetadata
+        {
+            public string Text { get; }
+            public string SearchContext { get; }
+
+            public ListBoxItemMetadata(string text, string searchContext)
+            {
+                Text = text;
+                SearchContext = searchContext;
+            }
+
+            public override string ToString()
+            {
+                return Text;
             }
         }
 
         private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (listBox.SelectedItem is string selectedItem)
+            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
-                // Combine dirPath with the selected folder name to get the full path
-                string fullPath = Path.Combine(dirPath, selectedItem);
+                string fullPath = Path.Combine(selectedItem.SearchContext == "dirPathCtrl" ? dirPathCtrl : dirPath, selectedItem.Text);
 
                 try
                 {
                     // Open the folder or navigate to it if already open
-                    OpenFolder(selectedItem);
+                    Process.Start("explorer.exe", fullPath);
                 }
                 catch (Exception ex)
                 {
@@ -134,16 +146,13 @@ namespace Find_Project
 
         private void OpenFolder(string folderName)
         {
-
-            if (lastSearchResult != null && lastSearchResult.Contains(folderName))
+            // Ensure the folder name is not null or empty
+            if (!string.IsNullOrEmpty(folderName))
             {
-                // Combine dirPath with the folder name to get the full path
-                string fullPath = Path.Combine(dirPath, folderName);
-
                 try
                 {
-                    // Open the folder
-                    Process.Start("explorer.exe", fullPath);
+                    // Open the folder using Process.Start
+                    Process.Start("explorer.exe", folderName);
                 }
                 catch (Exception ex)
                 {
@@ -153,7 +162,7 @@ namespace Find_Project
             }
             else
             {
-                MessageBox.Show("The folder does not exist or was not found in the last search result.");
+                MessageBox.Show("Folder name is null or empty.");
             }
         }
 
@@ -251,5 +260,3 @@ namespace Find_Project
 
     } // End of MainWindow class
 }
-
-
