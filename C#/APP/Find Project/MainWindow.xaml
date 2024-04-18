@@ -13,7 +13,7 @@
                 <Grid>
                     <TextBox x:Name="searchBox" Margin="10" VerticalAlignment="Top" KeyDown="SearchBox_KeyDown"/>
                     <Button Content="Search" Click="SearchButton_Click" Margin="10,40,10,10" VerticalAlignment="Top" />
-                    <ListBox x:Name="listBox" Margin="10,106,10,10" SelectionChanged="ListBox_SelectionChanged">
+                    <ListBox x:Name="listBox" Margin="10,106,10,10" MouseDoubleClick="ListBox_MouseDoubleClick">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding}">

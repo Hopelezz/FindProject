@@ -94,31 +94,6 @@ namespace Find_Project
             }
         }
 
-        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
-            {
-                // Get the full path using metadata from ListBoxItemMetadata
-                string fullPath = Path.Combine(selectedItem.SearchContext switch
-                {
-                    "dirPathCtrl" => dirPathCtrl,
-                    "dirPathShift" => dirPathShift,
-                    _ => dirPath
-                }, selectedItem.Text);
-
-                try
-                {
-                    // Open the folder or navigate to it if already open
-                    OpenFolder(fullPath);
-                }
-                catch (Exception ex)
-                {
-                    // Handle exception
-                    MessageBox.Show("Error opening folder: " + ex.Message);
-                }
-            }
-        }
-
         private void UpdateListBox(List<string> results, string searchContext)
         {
             listBox.Items.Clear(); // Clear existing items before adding new ones
@@ -160,7 +135,7 @@ namespace Find_Project
                 try
                 {
                     // Open the folder or navigate to it if already open
-                    Process.Start("explorer.exe", fullPath);
+                    OpenFolder(fullPath);
                 }
                 catch (Exception ex)
                 {
@@ -260,7 +235,7 @@ namespace Find_Project
                 dirPath = defaultPathTextBox.Text.Trim();
                 // Set dirPathCtrl to the text in ctrlPathTextBox
                 dirPathCtrl = ctrlPathTextBox.Text.Trim();
-                // Set dirPathShift to the text in shiftPathTextBox
+                // Set dirPathShift to the text in altPathTextBox
                 dirPathShift = shiftPathTextBox.Text.Trim();
 
                 // Save the dirPath to the settings file
