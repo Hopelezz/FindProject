@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,7 +14,8 @@ namespace Find_Project
     {
 
         private string dirPath; // Default dirPath
-        private string dirPathCtrl; // Alternate directory path for Alt+Enter search
+        private string dirPathCtrl; // Alternate directory path for CTRL+Enter search
+        private string dirPathShift; // Alternate directory path for Shit+Enter search
         private string settingsFilePath = @"C:\TEMP\FindProjectSetting.txt";
 
         private List<string> lastSearchResult = new();
@@ -28,24 +30,38 @@ namespace Find_Project
         // SEARCH FUNCTIONS
         private void SearchBox_KeyDown(object sender, KeyEventArgs e)
         {
-            if (dirPath == null || dirPathCtrl == null)
+            if (string.IsNullOrEmpty(dirPath))
             {
-                MessageBox.Show("Please set the default and alternate directory paths in settings.");
+                MessageBox.Show("Please set the default directory path in settings.");
                 return;
             }
-            else
+
+            // Control + Enter to search in alternate directory
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Enter)
             {
-                // Control + Enter to search in alternate directory
-                if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Enter)
+                if (string.IsNullOrEmpty(dirPathCtrl))
                 {
-                    PerformSearch(dirPathCtrl, "dirPathCtrl");
+                    MessageBox.Show("Please set the Ctrl+Enter path in settings.");
+                    return;
                 }
-                else if (e.Key == Key.Enter)
+                PerformSearch(dirPathCtrl, "dirPathCtrl");
+            }
+            // Shift + Enter to search in alternate directory
+            else if (Keyboard.IsKeyDown(Key.LeftShift) && e.Key == Key.Enter)
+            {
+                if (string.IsNullOrEmpty(dirPathShift))
                 {
-                    PerformSearch(dirPath, "dirPath");
+                    MessageBox.Show("Please set the Shift+Enter path in settings.");
+                    return;
                 }
+                PerformSearch(dirPathShift, "dirPathShift");
+            }
+            else if (e.Key == Key.Enter)
+            {
+                PerformSearch(dirPath, "dirPath");
             }
         }
+
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
@@ -83,7 +99,12 @@ namespace Find_Project
             if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
                 // Get the full path using metadata from ListBoxItemMetadata
-                string fullPath = Path.Combine(selectedItem.SearchContext == "dirPathCtrl" ? dirPathCtrl : dirPath, selectedItem.Text);
+                string fullPath = Path.Combine(selectedItem.SearchContext switch
+                {
+                    "dirPathCtrl" => dirPathCtrl,
+                    "dirPathShift" => dirPathShift,
+                    _ => dirPath
+                }, selectedItem.Text);
 
                 try
                 {
@@ -129,7 +150,12 @@ namespace Find_Project
         {
             if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
-                string fullPath = Path.Combine(selectedItem.SearchContext == "dirPathCtrl" ? dirPathCtrl : dirPath, selectedItem.Text);
+                string fullPath = Path.Combine(selectedItem.SearchContext switch
+                {
+                    "dirPathCtrl" => dirPathCtrl,
+                    "dirPathShift" => dirPathShift,
+                    _ => dirPath
+                }, selectedItem.Text);
 
                 try
                 {
@@ -192,6 +218,11 @@ namespace Find_Project
                                     dirPathCtrl = value; // Set dirPathCtrl value
                                     ctrlPathTextBox.Text = value; // Set text of the TextBox
                                     break;
+                                // Add more cases if needed
+                                case "dirPathShift":
+                                    dirPathShift = value; // Set dirPathShift value
+                                    shiftPathTextBox.Text = value; // Set text of the TextBox
+                                    break;
                             }
                         }
                     }
@@ -205,6 +236,8 @@ namespace Find_Project
                 defaultPathTextBox.Foreground = Brushes.LightGray; // Set passive text color
                 ctrlPathTextBox.Text = "Enter CTRL+Enter path...";
                 ctrlPathTextBox.Foreground = Brushes.LightGray; // Set passive text color
+                shiftPathTextBox.Text = "Enter Shift+Enter path...";
+                shiftPathTextBox.Foreground = Brushes.LightGray; // Set passive text color
             }
         }
 
@@ -215,7 +248,7 @@ namespace Find_Project
             {
                 writer.WriteLine("dirPath: " + dirPath);
                 writer.WriteLine("dirPathCtrl: " + dirPathCtrl);
-                // Add more variables if needed
+                writer.WriteLine("dirPathShift: " + dirPathShift);
             }
         }
 
@@ -227,6 +260,8 @@ namespace Find_Project
                 dirPath = defaultPathTextBox.Text.Trim();
                 // Set dirPathCtrl to the text in ctrlPathTextBox
                 dirPathCtrl = ctrlPathTextBox.Text.Trim();
+                // Set dirPathShift to the text in shiftPathTextBox
+                dirPathShift = shiftPathTextBox.Text.Trim();
 
                 // Save the dirPath to the settings file
                 SaveSettings();
