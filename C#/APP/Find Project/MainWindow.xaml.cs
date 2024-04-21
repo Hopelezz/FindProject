@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Find_Project.Utilities;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Windows;
-using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -23,7 +21,7 @@ namespace Find_Project
             shiftPathTextBox.Text = settings.DirPathShift;
         }
 
-// SEARCH FUNCTIONS
+        // SEARCH FUNCTIONS
         // KeyDown event handler for the search box
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -33,30 +31,9 @@ namespace Find_Project
             }
         }
 
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            string path;
-            string searchContext;
-            string searchContextText;
-
-            if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
-            {
-                path = settings.DirPathCtrl;
-                searchContext = "dirPathCtrl";
-                searchContextText = "Ctrl+Enter";
-            }
-            else if (System.Windows.Forms.Control.ModifierKeys == Keys.Shift)
-            {
-                path = settings.DirPathShift;
-                searchContext = "dirPathShift";
-                searchContextText = "Shift+Enter";
-            }
-            else
-            {
-                path = settings.DirPath;
-                searchContext = "dirPath";
-                searchContextText = "Default Path";
-            }
+            var (path, searchContext, searchContextText) = Utilities.FileOperations.PathByKeybind(settings);
 
             if (string.IsNullOrEmpty(path))
             {
@@ -66,24 +43,17 @@ namespace Find_Project
             // Update status bar
             statusMessage.Text = $"{searchContextText} | Directory: {path}";
 
-            PerformSearch(path, searchContext);
-        }
-
-        // Helper function to perform the search
-        private async void PerformSearch(string path, string searchContext)
-        {
-            // Check if the path is empty
-            if (string.IsNullOrEmpty(path))
-            {
-                warningLabel.Content = "Please set a directory path in settings before searching.";
-                return;
-            }
             try
             {
-                Search search = new();
-                List<string> results = await Search.SearchFoldersAsync(searchBox.Text, path, settings.SearchDepth);
+                SearchService searchService = new();
+                List<ListBoxItemMetadata> items = await searchService.PerformSearchAsync(searchBox.Text, path, settings.SearchDepth, searchContext);
 
-                UpdateListBox(results, searchContext);
+                listBox.Items.Clear();
+                foreach (var item in items)
+                {
+                    listBox.Items.Add(item);
+                }
+
                 // Remove any previous warning messages
                 warningLabel.Content = "";
             }
@@ -102,13 +72,42 @@ namespace Find_Project
             }
         }
 
-        private void UpdateListBox(List<string> results, string searchContext)
+        // Helper function to perform the search
+        private async void PerformSearch(string path, string searchContext)
         {
-            listBox.Items.Clear(); // Clear existing items before adding new ones
-            foreach (string result in results)
+            // Check if the path is empty
+            if (string.IsNullOrEmpty(path))
             {
-                // Add the result along with its search context as a hidden item
-                listBox.Items.Add(new ListBoxItemMetadata(result, searchContext));
+                warningLabel.Content = "Please set a directory path in settings before searching.";
+                return;
+            }
+            try
+            {
+                Search search = new();
+                List<string> results = await Search.SearchFoldersAsync(searchBox.Text, path, settings.SearchDepth);
+
+                List<ListBoxItemMetadata> items = Utilities.FileOperations.UpdateListBox(results, searchContext);
+                listBox.Items.Clear();
+                foreach (var item in items)
+                {
+                    listBox.Items.Add(item);
+                }
+
+                // Remove any previous warning messages
+                warningLabel.Content = "";
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Set warning message
+                warningLabel.Content = "Access denied. Try running the application as an administrator.";
+            }
+            catch (ArgumentException ex)
+            {
+                warningLabel.Content = ex.Message;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("An error occurred: " + ex.Message);
             }
         }
 
@@ -130,24 +129,21 @@ namespace Find_Project
             }
         }
 
-        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs? e)
         {
             if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
-                string fullPath = Path.Combine(selectedItem.SearchContext switch
-                {
-                    "dirPathCtrl" => settings.DirPathCtrl,
-                    "dirPathShift" => settings.DirPathShift,
-                    _ => settings.DirPath
-                }, selectedItem.Text);
+
+                string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
 
                 try
                 {
                     // Open the folder or navigate to it if already open
-                    OpenFolder(fullPath);
+                    Utilities.FileOperations.OpenFolder(fullPath);
 
-                    // Update the status bar
+                    // Update the status bar with the returned message
                     statusMessage.Text = "Opened folder: " + fullPath;
+
                 }
                 catch (Exception ex)
                 {
@@ -157,26 +153,42 @@ namespace Find_Project
             }
         }
 
-        // Utility function to open a folder in Windows Explorer
-        private static void OpenFolder(string folderName)
+        private void Open_Click(object sender, RoutedEventArgs e)
         {
-            // Ensure the folder name is not null or empty
-            if (!string.IsNullOrEmpty(folderName))
+            // Perform the same action as double-clicking on the selected item
+            ListBox_MouseDoubleClick(sender, null);
+
+        }
+
+        private void VisualStudio_Click(object sender, RoutedEventArgs e)
+        {
+            // Open the selected item in Visual Studio Code
+
+            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
-                try
-                {
-                    // Open the folder using Process.Start
-                    Process.Start("explorer.exe", folderName);
-                }
-                catch (Exception ex)
-                {
-                    // Handle exception
-                    System.Windows.Forms.MessageBox.Show("Error opening folder: " + ex.Message);
-                }
+                string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
+                Utilities.FileOperations.OpenFolderInVSCode(fullPath);
+
+                // Update the status bar using the returned message
+                statusMessage.Text = Utilities.FileOperations.OpenFolderInVSCode(fullPath);
             }
-            else
+        }
+
+        private void Properties_Click(object sender, RoutedEventArgs e)
+        {
+            // Open the properties window for the selected item
+            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
-                System.Windows.Forms.MessageBox.Show("Folder name is null or empty.");
+                string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
+
+                // Open the properties window using ShellExecute.cs
+                ShellExecute.SHELLEXECUTEINFO info = new ShellExecute.SHELLEXECUTEINFO();
+                info.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(info);
+                info.lpVerb = "properties";
+                info.lpFile = fullPath;
+                info.nShow = ShellExecute.SW_SHOW;
+                info.fMask = ShellExecute.SEE_MASK_INVOKEIDLIST;
+                ShellExecute.ShellExecuteEx(ref info);
             }
         }
 
@@ -201,7 +213,6 @@ namespace Find_Project
             {
                 System.Windows.MessageBox.Show("Error saving settings: " + ex.Message);
             }
-
         }
 
         // Utility function to open a folder browser dialog
