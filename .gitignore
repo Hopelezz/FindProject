@@ -159,3 +159,7 @@ $RECYCLE.BIN/
 /C#/.vs
 /C#/APP/.vs
 /C#/APP/Find Project/.vs
+/.vs/VSWorkspaceState.json
+/.vs/FindProject
+/.vs
+/.gitignore
