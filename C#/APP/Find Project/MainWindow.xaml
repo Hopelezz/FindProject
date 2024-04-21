@@ -15,7 +15,7 @@
         <TabControl Margin="0,0,0,45">
             <!-- Search Tab -->
             <TabItem Header="Search">
-                <Grid>
+                <Grid Height="349" VerticalAlignment="Top">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="45*"/>
                         <RowDefinition Height="301*"/>
@@ -35,7 +35,11 @@
             </TabItem>
             <!-- Settings Tab -->
             <TabItem Header="Settings">
-                <Grid>
+                <Grid Margin="0,0,0,-23">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="27*"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="115"/>
                         <ColumnDefinition/>
@@ -76,7 +80,7 @@
                     </Grid>
 
                     <!-- Save Button -->
-                    <Button Content="Save" Click="SaveButton_Click" Margin="10,284,10,0" Grid.Column="1" Height="32" VerticalAlignment="Top"/>
+                    <Button Content="Save" Click="SaveButton_Click" Margin="10,304,10,0" Grid.Column="1" Height="32" VerticalAlignment="Bottom"/>
 
                 </Grid>
             </TabItem>

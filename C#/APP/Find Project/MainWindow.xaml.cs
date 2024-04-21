@@ -37,26 +37,30 @@ namespace Find_Project
         {
             string path;
             string searchContext;
+            string searchContextText;
 
             if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
             {
                 path = settings.DirPathCtrl;
-                searchContext = "Ctrl+Enter";
+                searchContext = "dirPathCtrl";
+                searchContextText = "Ctrl+Enter";
             }
             else if (System.Windows.Forms.Control.ModifierKeys == Keys.Shift)
             {
                 path = settings.DirPathShift;
-                searchContext = "Shift+Enter";
+                searchContext = "dirPathShift";
+                searchContextText = "Shift+Enter";
             }
             else
             {
                 path = settings.DirPath;
-                searchContext = "Default Path";
+                searchContext = "dirPath";
+                searchContextText = "Default Path";
             }
 
             if (string.IsNullOrEmpty(path))
             {
-                System.Windows.MessageBox.Show($"Please set the {searchContext} in settings.");
+                System.Windows.MessageBox.Show($"Please set the {searchContextText} in settings.");
                 return;
             }
             // Update status bar
