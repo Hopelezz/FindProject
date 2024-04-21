@@ -63,6 +63,31 @@ namespace Find_Project.Utilities
             }
         }
 
+        // Utility function to open a folder browser dialog
+        public static string? OpenFolderBrowserDialog()
+        {
+            // Create a new folder browser dialog
+            using var dialog = new FolderBrowserDialog();
+            {
+                // Set the description and root folder (optional)
+                dialog.Description = "Select the default path:";
+                dialog.RootFolder = Environment.SpecialFolder.MyComputer;
+
+                // Show the dialog and get the result
+                DialogResult result = dialog.ShowDialog();
+
+                // If the user selects a folder, return the selected path
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    return dialog.SelectedPath;
+                }
+                else
+                {
+                    return null; // User cancelled or closed the dialog
+                }
+            }
+        }
+
         // Utility function to open a folder in Visual Studio Code
         public static string OpenFolderInVSCode(string fullPath)
         {
