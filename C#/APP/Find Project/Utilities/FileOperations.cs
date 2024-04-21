@@ -13,7 +13,7 @@ namespace Find_Project.Utilities
         // Helper function to update the ListBox with search results
         public static List<ListBoxItemMetadata> UpdateListBox(List<string> results, string searchContext)
         {
-            List<ListBoxItemMetadata> items = new List<ListBoxItemMetadata>();
+            List<ListBoxItemMetadata> items = new();
 
             foreach (string result in results)
             {
@@ -148,10 +148,9 @@ namespace Find_Project.Utilities
 
     public class SearchService
     {
-        public async Task<List<ListBoxItemMetadata>> PerformSearchAsync(string searchText, string path, int searchDepth, string searchContext)
+        public static async Task<List<ListBoxItemMetadata>> PerformSearchAsync(string searchText, string path, int searchDepth, string searchContext)
         {
             // Perform the search and return the results
-            Search search = new();
             List<string> results = await Search.SearchFoldersAsync(searchText, path, searchDepth);
             return Utilities.FileOperations.UpdateListBox(results, searchContext);
         }

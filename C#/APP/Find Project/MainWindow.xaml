@@ -28,9 +28,9 @@
                             <DataTemplate>
                                 <TextBlock Text="{Binding}">
                                     <TextBlock.ContextMenu>
-                                        <ContextMenu>
+                                        <ContextMenu x:Name="contextMenu">
                                             <MenuItem Header="Open" Click="Open_Click"/>
-                                            <MenuItem Header="Visual Studio" Click="VisualStudio_Click"/>
+                                            <MenuItem Header="Open in VS Code" Click="VisualStudio_Click" Visibility="{Binding IsVSCodeVisible, RelativeSource={RelativeSource AncestorType=Window}}"/>
                                             <Separator/>
                                             <MenuItem Header="Properties" Click="Properties_Click"/>
                                         </ContextMenu>

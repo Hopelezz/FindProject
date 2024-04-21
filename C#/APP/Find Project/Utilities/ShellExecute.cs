@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-public static class ShellExecute
+class ShellExecute
 {
     [DllImport("shell32.dll", CharSet = CharSet.Auto)]
     public static extern bool ShellExecuteEx(ref SHELLEXECUTEINFO lpExecInfo);

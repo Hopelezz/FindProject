@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Windows;
 using System.Windows.Controls;
 using static Find_Project.MainWindow;
 
@@ -7,8 +10,19 @@ namespace Find_Project.Utilities
 {
     public class AppOperations
     {
+        // Helper function to consolidate the path based on the keybind
+        public static void PathButton(TextBox targetTextBox)
+        {
+            // Open a folder browser dialog to select the default path and set the text box
+            string? selectedPath = Utilities.FileOperations.OpenFolderBrowserDialog();
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                targetTextBox.Text = selectedPath;
+            }
+        }
+
         // Helper function to update the text boxes with the settings values
-        public void UpdateSettingsTextBoxes(AppSettings settings, TextBox defaultPathTextBox, TextBox ctrlPathTextBox, TextBox shiftPathTextBox)
+        public static void UpdateSettingsTextBoxes(AppSettings settings, TextBox defaultPathTextBox, TextBox ctrlPathTextBox, TextBox shiftPathTextBox)
         {
             defaultPathTextBox.Text = settings.DirPath;
             ctrlPathTextBox.Text = settings.DirPathCtrl;
@@ -16,7 +30,7 @@ namespace Find_Project.Utilities
         }
 
         // Helper function to update the ListBox with search results
-        public void UpdateListBox(List<ListBoxItemMetadata> items, ListBox listBox, TextBlock statusMessage)
+        public static void UpdateListBox(List<ListBoxItemMetadata> items, ListBox listBox, TextBlock statusMessage)
         {
             listBox.Items.Clear();
             foreach (var item in items)
@@ -30,8 +44,57 @@ namespace Find_Project.Utilities
             }
         }
 
+        public static bool IsVSCodeInPath()
+        {
+            var pathVariable = Environment.GetEnvironmentVariable("PATH");
+            var paths = pathVariable?.Split(Path.PathSeparator);
+            if (paths != null)
+            {
+                foreach (string path in paths)
+                {
+                    var fullPath = Path.Combine(path, "code.exe");
+                    if (File.Exists(fullPath))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // If we've checked all paths and not found VS Code, it's not installed
+            return false;
+        }
+
+        public static bool IsVSCodeInstalledFromRegistry()
+        {
+            // Check both the 32-bit and 64-bit registry views
+            foreach (var view in new[] { RegistryView.Registry32, RegistryView.Registry64 })
+            {
+                // Open the registry key for uninstall information
+                using var baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view);
+                using var key = baseKey.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall");
+                if (key != null)
+                {
+                    foreach (var subkeyName in key.GetSubKeyNames())
+                    {
+                        using var subkey = key.OpenSubKey(subkeyName);
+                        if (subkey != null)
+                        {
+                            var displayName = subkey.GetValue("DisplayName") as string;
+                            if (displayName == "Microsoft Visual Studio Code")
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // If we've checked all registry keys and not found VS Code, it's not installed
+            return false;
+        }
+
         // Create a list of status messages to display in the status bar
-        public string RandomStatusMessage()
+        public static string RandomStatusMessage()
         {
             List<string> statusMessages = new()
             {

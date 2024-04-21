@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Find_Project
@@ -9,23 +10,21 @@ namespace Find_Project
     public partial class MainWindow : Window
     {
         private readonly AppSettings settings = new();
-        private readonly AppOperations appOperations = new();
 
 
         public MainWindow()
         {
             InitializeComponent();
-            appOperations.UpdateSettingsTextBoxes(settings, defaultPathTextBox, ctrlPathTextBox, shiftPathTextBox);
+            AppOperations.UpdateSettingsTextBoxes(settings, defaultPathTextBox, ctrlPathTextBox, shiftPathTextBox);
             InitializeListBox();
-            statusMessage.Text = appOperations.RandomStatusMessage();
+            statusMessage.Text = AppOperations.RandomStatusMessage();
         }
 
         private void InitializeListBox()
         {
-            List<ListBoxItemMetadata> items = new List<ListBoxItemMetadata>();
-            appOperations.UpdateListBox(items, listBox, statusMessage);
+            var items = new List<ListBoxItemMetadata>();
+            AppOperations.UpdateListBox(items, listBox, statusMessage);
         }
-
 
         // Helper function to open the folder of the selected item
         private void OpenFolder(ListBoxItemMetadata selectedItem)
@@ -70,10 +69,10 @@ namespace Find_Project
             try
             {
                 SearchService searchService = new();
-                List<ListBoxItemMetadata> items = await searchService.PerformSearchAsync(searchBox.Text, path, settings.SearchDepth, searchContext);
+                List<ListBoxItemMetadata> items = await SearchService.PerformSearchAsync(searchBox.Text, path, settings.SearchDepth, searchContext);
 
                 // Update the ListBox with the search results
-                appOperations.UpdateListBox(items, listBox, statusMessage);
+                AppOperations.UpdateListBox(items, listBox, statusMessage);
 
                 // Remove any previous warning messages
                 warningLabel.Content = "";
@@ -111,7 +110,6 @@ namespace Find_Project
             }
         }
 
-
         private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs? e)
         {
             if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
@@ -126,17 +124,19 @@ namespace Find_Project
             ListBox_MouseDoubleClick(sender, null);
         }
 
+        // Visibility property for the "Open in VS Code" menu item
+        public static Visibility IsVSCodeVisible => (AppOperations.IsVSCodeInstalledFromRegistry() || AppOperations.IsVSCodeInPath()) ? Visibility.Visible : Visibility.Collapsed;
+
         private void VisualStudio_Click(object sender, RoutedEventArgs e)
         {
             // Open the selected item in Visual Studio Code
-
             if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
             {
                 string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
-                Utilities.FileOperations.OpenFolderInVSCode(fullPath);
+                string status = Utilities.FileOperations.OpenFolderInVSCode(fullPath);
 
-                // Update the status bar using the returned message
-                statusMessage.Text = Utilities.FileOperations.OpenFolderInVSCode(fullPath);
+                // Update the status bar with the status message
+                statusMessage.Text = status;
             }
         }
 
@@ -148,7 +148,7 @@ namespace Find_Project
                 string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
 
                 // Open the properties window using ShellExecute.cs
-                ShellExecute.SHELLEXECUTEINFO info = new ShellExecute.SHELLEXECUTEINFO();
+                ShellExecute.SHELLEXECUTEINFO info = new();
                 info.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(info);
                 info.lpVerb = "properties";
                 info.lpFile = fullPath;
@@ -181,36 +181,19 @@ namespace Find_Project
             }
         }
 
-
-
         private void DefaultPathButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open a folder browser dialog to select the default path and set the text box
-            string? selectedPath = Utilities.FileOperations.OpenFolderBrowserDialog();
-            if (!string.IsNullOrEmpty(selectedPath))
-            {
-                defaultPathTextBox.Text = selectedPath;
-            }
+            AppOperations.PathButton(defaultPathTextBox);
         }
 
         private void CtrlPathButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open a folder browser dialog to select the default path and set the text box
-            string? selectedPath = Utilities.FileOperations.OpenFolderBrowserDialog();
-            if (!string.IsNullOrEmpty(selectedPath))
-            {
-                ctrlPathTextBox.Text = selectedPath;
-            }
+            AppOperations.PathButton(ctrlPathTextBox);
         }
 
         private void ShiftPathButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open a folder browser dialog to select the default path and set the text box
-            string? selectedPath = Utilities.FileOperations.OpenFolderBrowserDialog();
-            if (!string.IsNullOrEmpty(selectedPath))
-            {
-                shiftPathTextBox.Text = selectedPath;
-            }
+            AppOperations.PathButton(shiftPathTextBox);
         }
 
     } // End of MainWindow class
