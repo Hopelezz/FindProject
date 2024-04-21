@@ -26,7 +26,16 @@
                     <ListBox x:Name="listBox" Margin="10,60,10,10" MouseDoubleClick="ListBox_MouseDoubleClick" Grid.Row="1" av:ItemsSource="{av:SampleData ItemCount=5}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding}"/>
+                                <TextBlock Text="{Binding}">
+                                    <TextBlock.ContextMenu>
+                                        <ContextMenu x:Name="contextMenu">
+                                            <MenuItem Header="Open" Click="Open_Click"/>
+                                            <MenuItem Header="Open in VS Code" Click="VisualStudio_Click" Visibility="{Binding IsVSCodeVisible, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                            <Separator/>
+                                            <MenuItem Header="Properties" Click="Properties_Click"/>
+                                        </ContextMenu>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>

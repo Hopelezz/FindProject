@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Find_Project.Utilities;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Windows;
-using System.Windows.Controls.Primitives;
-using System.Windows.Forms;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Find_Project
@@ -13,17 +11,40 @@ namespace Find_Project
     {
         private readonly AppSettings settings = new();
 
+
         public MainWindow()
         {
             InitializeComponent();
-
-            // Update the text boxes with the loaded settings
-            defaultPathTextBox.Text = settings.DirPath;
-            ctrlPathTextBox.Text = settings.DirPathCtrl;
-            shiftPathTextBox.Text = settings.DirPathShift;
+            AppOperations.UpdateSettingsTextBoxes(settings, defaultPathTextBox, ctrlPathTextBox, shiftPathTextBox);
+            InitializeListBox();
+            statusMessage.Text = AppOperations.RandomStatusMessage();
         }
 
-// SEARCH FUNCTIONS
+        private void InitializeListBox()
+        {
+            var items = new List<SearchMetadata>();
+            AppOperations.UpdateListBox(items, listBox, statusMessage);
+        }
+
+        // Helper function to open the folder of the selected item
+        private void OpenFolder(SearchMetadata selectedItem)
+        {
+            if (selectedItem != null)
+            {
+                string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
+                try
+                {
+                    Utilities.FileOperations.OpenFolder(fullPath);
+                    statusMessage.Text = $"Opened folder: {fullPath}";
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show($"Error opening folder: {ex.Message}");
+                }
+            }
+        }
+
+        // SEARCH FUNCTIONS
         // KeyDown event handler for the search box
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -33,30 +54,9 @@ namespace Find_Project
             }
         }
 
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            string path;
-            string searchContext;
-            string searchContextText;
-
-            if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
-            {
-                path = settings.DirPathCtrl;
-                searchContext = "dirPathCtrl";
-                searchContextText = "Ctrl+Enter";
-            }
-            else if (System.Windows.Forms.Control.ModifierKeys == Keys.Shift)
-            {
-                path = settings.DirPathShift;
-                searchContext = "dirPathShift";
-                searchContextText = "Shift+Enter";
-            }
-            else
-            {
-                path = settings.DirPath;
-                searchContext = "dirPath";
-                searchContextText = "Default Path";
-            }
+            var (path, searchContext, searchContextText) = Utilities.FileOperations.PathByKeybind(settings);
 
             if (string.IsNullOrEmpty(path))
             {
@@ -66,24 +66,14 @@ namespace Find_Project
             // Update status bar
             statusMessage.Text = $"{searchContextText} | Directory: {path}";
 
-            PerformSearch(path, searchContext);
-        }
-
-        // Helper function to perform the search
-        private async void PerformSearch(string path, string searchContext)
-        {
-            // Check if the path is empty
-            if (string.IsNullOrEmpty(path))
-            {
-                warningLabel.Content = "Please set a directory path in settings before searching.";
-                return;
-            }
             try
             {
-                Search search = new();
-                List<string> results = await Search.SearchFoldersAsync(searchBox.Text, path, settings.SearchDepth);
+                SearchService searchService = new();
+                List<SearchMetadata> items = await SearchService.PerformSearchAsync(searchBox.Text, path, settings.SearchDepth, searchContext);
 
-                UpdateListBox(results, searchContext);
+                // Update the ListBox with the search results
+                AppOperations.UpdateListBox(items, listBox, statusMessage);
+
                 // Remove any previous warning messages
                 warningLabel.Content = "";
             }
@@ -102,81 +92,51 @@ namespace Find_Project
             }
         }
 
-        private void UpdateListBox(List<string> results, string searchContext)
+        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs? e)
         {
-            listBox.Items.Clear(); // Clear existing items before adding new ones
-            foreach (string result in results)
+            if (listBox.SelectedItem is SearchMetadata selectedItem)
             {
-                // Add the result along with its search context as a hidden item
-                listBox.Items.Add(new ListBoxItemMetadata(result, searchContext));
+                OpenFolder(selectedItem);
             }
         }
 
-        // ListBoxItemMetadata class to store the text and search context of each item
-        public class ListBoxItemMetadata
+        private void Open_Click(object sender, RoutedEventArgs e)
         {
-            public string Text { get; }
-            public string SearchContext { get; }
+            // Perform the same action as double-clicking on the selected item
+            ListBox_MouseDoubleClick(sender, null);
+        }
 
-            public ListBoxItemMetadata(string text, string searchContext)
-            {
-                Text = text;
-                SearchContext = searchContext;
-            }
+        // Visibility property for the "Open in VS Code" menu item
+        public static Visibility IsVSCodeVisible => (AppOperations.IsVSCodeInstalledFromRegistry() || AppOperations.IsVSCodeInPath()) ? Visibility.Visible : Visibility.Collapsed;
 
-            public override string ToString()
+        private void VisualStudio_Click(object sender, RoutedEventArgs e)
+        {
+            // Open the selected item in Visual Studio Code
+            if (listBox.SelectedItem is SearchMetadata selectedItem)
             {
-                return Text;
+                string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
+                string status = Utilities.FileOperations.OpenFolderInVSCode(fullPath);
+
+                // Update the status bar with the status message
+                statusMessage.Text = status;
             }
         }
 
-        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void Properties_Click(object sender, RoutedEventArgs e)
         {
-            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
+            // Open the properties window for the selected item
+            if (listBox.SelectedItem is SearchMetadata selectedItem)
             {
-                string fullPath = Path.Combine(selectedItem.SearchContext switch
-                {
-                    "dirPathCtrl" => settings.DirPathCtrl,
-                    "dirPathShift" => settings.DirPathShift,
-                    _ => settings.DirPath
-                }, selectedItem.Text);
+                string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
 
-                try
-                {
-                    // Open the folder or navigate to it if already open
-                    OpenFolder(fullPath);
-
-                    // Update the status bar
-                    statusMessage.Text = "Opened folder: " + fullPath;
-                }
-                catch (Exception ex)
-                {
-                    // Handle exception
-                    System.Windows.Forms.MessageBox.Show("Error opening folder: " + ex.Message);
-                }
-            }
-        }
-
-        // Utility function to open a folder in Windows Explorer
-        private static void OpenFolder(string folderName)
-        {
-            // Ensure the folder name is not null or empty
-            if (!string.IsNullOrEmpty(folderName))
-            {
-                try
-                {
-                    // Open the folder using Process.Start
-                    Process.Start("explorer.exe", folderName);
-                }
-                catch (Exception ex)
-                {
-                    // Handle exception
-                    System.Windows.Forms.MessageBox.Show("Error opening folder: " + ex.Message);
-                }
-            }
-            else
-            {
-                System.Windows.Forms.MessageBox.Show("Folder name is null or empty.");
+                // Open the properties window using ShellExecute.cs
+                ShellExecute.SHELLEXECUTEINFO info = new();
+                info.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(info);
+                info.lpVerb = "properties";
+                info.lpFile = fullPath;
+                info.nShow = ShellExecute.SW_SHOW;
+                info.fMask = ShellExecute.SEE_MASK_INVOKEIDLIST;
+                ShellExecute.ShellExecuteEx(ref info);
             }
         }
 
@@ -201,62 +161,21 @@ namespace Find_Project
             {
                 System.Windows.MessageBox.Show("Error saving settings: " + ex.Message);
             }
-
-        }
-
-        // Utility function to open a folder browser dialog
-        private static string? OpenFolderBrowserDialog()
-        {
-            // Create a new folder browser dialog
-            using var dialog = new FolderBrowserDialog();
-            {
-                // Set the description and root folder (optional)
-                dialog.Description = "Select the default path:";
-                dialog.RootFolder = Environment.SpecialFolder.MyComputer;
-
-                // Show the dialog and get the result
-                DialogResult result = dialog.ShowDialog();
-
-                // If the user selects a folder, return the selected path
-                if (result == System.Windows.Forms.DialogResult.OK)
-                {
-                    return dialog.SelectedPath;
-                }
-                else
-                {
-                    return null; // User cancelled or closed the dialog
-                }
-            }
         }
 
         private void DefaultPathButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open a folder browser dialog to select the default path and set the text box
-            string? selectedPath = OpenFolderBrowserDialog();
-            if (!string.IsNullOrEmpty(selectedPath))
-            {
-                defaultPathTextBox.Text = selectedPath;
-            }
+            AppOperations.PathButton(defaultPathTextBox);
         }
 
         private void CtrlPathButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open a folder browser dialog to select the default path and set the text box
-            string? selectedPath = OpenFolderBrowserDialog();
-            if (!string.IsNullOrEmpty(selectedPath))
-            {
-                ctrlPathTextBox.Text = selectedPath;
-            }
+            AppOperations.PathButton(ctrlPathTextBox);
         }
 
         private void ShiftPathButton_Click(object sender, RoutedEventArgs e)
         {
-            // Open a folder browser dialog to select the default path and set the text box
-            string? selectedPath = OpenFolderBrowserDialog();
-            if (!string.IsNullOrEmpty(selectedPath))
-            {
-                shiftPathTextBox.Text = selectedPath;
-            }
+            AppOperations.PathButton(shiftPathTextBox);
         }
 
     } // End of MainWindow class
