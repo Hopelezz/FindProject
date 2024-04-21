@@ -2,74 +2,76 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace Find_Project
 {
     public partial class MainWindow : Window
     {
-
-        private string dirPath; // Default dirPath
-        private string dirPathCtrl; // Alternate directory path for CTRL+Enter search
-        private string dirPathShift; // Alternate directory path for Shit+Enter search
-        private string settingsFilePath = @"C:\TEMP\FindProjectSetting.txt";
-
-        private List<string> lastSearchResult = new();
-
+        private readonly AppSettings settings = new();
 
         public MainWindow()
         {
             InitializeComponent();
-            LoadSettings();
+
+            // Update the text boxes with the loaded settings
+            defaultPathTextBox.Text = settings.DirPath;
+            ctrlPathTextBox.Text = settings.DirPathCtrl;
+            shiftPathTextBox.Text = settings.DirPathShift;
         }
 
         // SEARCH FUNCTIONS
-        private void SearchBox_KeyDown(object sender, KeyEventArgs e)
+        // KeyDown event handler for the search box
+        private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            if (string.IsNullOrEmpty(dirPath))
+            if (e.Key == Key.Enter)
             {
-                MessageBox.Show("Please set the default directory path in settings.");
-                return;
-            }
-
-            // Control + Enter to search in alternate directory
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && e.Key == Key.Enter)
-            {
-                if (string.IsNullOrEmpty(dirPathCtrl))
-                {
-                    MessageBox.Show("Please set the Ctrl+Enter path in settings.");
-                    return;
-                }
-                PerformSearch(dirPathCtrl, "dirPathCtrl");
-            }
-            // Shift + Enter to search in alternate directory
-            else if (Keyboard.IsKeyDown(Key.LeftShift) && e.Key == Key.Enter)
-            {
-                if (string.IsNullOrEmpty(dirPathShift))
-                {
-                    MessageBox.Show("Please set the Shift+Enter path in settings.");
-                    return;
-                }
-                PerformSearch(dirPathShift, "dirPathShift");
-            }
-            else if (e.Key == Key.Enter)
-            {
-                PerformSearch(dirPath, "dirPath");
+                SearchButton_Click(sender, e);
             }
         }
 
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
-            PerformSearch(dirPath, "dirPath");
+            string path;
+            string searchContext;
+
+            if (System.Windows.Forms.Control.ModifierKeys == Keys.Control)
+            {
+                path = settings.DirPathCtrl;
+                searchContext = "Ctrl+Enter";
+            }
+            else if (System.Windows.Forms.Control.ModifierKeys == Keys.Shift)
+            {
+                path = settings.DirPathShift;
+                searchContext = "Shift+Enter";
+            }
+            else
+            {
+                path = settings.DirPath;
+                searchContext = "Default Path";
+            }
+
+            if (string.IsNullOrEmpty(path))
+            {
+                System.Windows.MessageBox.Show($"Please set the {searchContext} in settings.");
+                return;
+            }
+
+            PerformSearch(path, searchContext);
         }
 
+        // Helper function to perform the search
         private async void PerformSearch(string path, string searchContext)
         {
+            // Check if the path is empty
+            if (string.IsNullOrEmpty(path))
+            {
+                warningLabel.Content = "Please set a directory path in settings before searching.";
+                return;
+            }
             try
             {
                 Search search = new();
@@ -90,7 +92,7 @@ namespace Find_Project
             }
             catch (Exception ex)
             {
-                MessageBox.Show("An error occurred: " + ex.Message);
+                System.Windows.MessageBox.Show("An error occurred: " + ex.Message);
             }
         }
 
@@ -104,6 +106,7 @@ namespace Find_Project
             }
         }
 
+        // ListBoxItemMetadata class to store the text and search context of each item
         public class ListBoxItemMetadata
         {
             public string Text { get; }
@@ -127,9 +130,9 @@ namespace Find_Project
             {
                 string fullPath = Path.Combine(selectedItem.SearchContext switch
                 {
-                    "dirPathCtrl" => dirPathCtrl,
-                    "dirPathShift" => dirPathShift,
-                    _ => dirPath
+                    "dirPathCtrl" => settings.DirPathCtrl,
+                    "dirPathShift" => settings.DirPathShift,
+                    _ => settings.DirPath
                 }, selectedItem.Text);
 
                 try
@@ -140,12 +143,13 @@ namespace Find_Project
                 catch (Exception ex)
                 {
                     // Handle exception
-                    MessageBox.Show("Error opening folder: " + ex.Message);
+                    System.Windows.Forms.MessageBox.Show("Error opening folder: " + ex.Message);
                 }
             }
         }
 
-        private void OpenFolder(string folderName)
+        // Utility function to open a folder in Windows Explorer
+        private static void OpenFolder(string folderName)
         {
             // Ensure the folder name is not null or empty
             if (!string.IsNullOrEmpty(folderName))
@@ -158,72 +162,12 @@ namespace Find_Project
                 catch (Exception ex)
                 {
                     // Handle exception
-                    MessageBox.Show("Error opening folder: " + ex.Message);
+                    System.Windows.Forms.MessageBox.Show("Error opening folder: " + ex.Message);
                 }
             }
             else
             {
-                MessageBox.Show("Folder name is null or empty.");
-            }
-        }
-
-        // SETTINGS
-        private void LoadSettings()
-        {
-            if (File.Exists(settingsFilePath))
-            {
-                using StreamReader reader = new(settingsFilePath);
-                {
-                    string? line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        string[] parts = line.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length == 2)
-                        {
-                            string varName = parts[0].Trim();
-                            string value = parts[1].Trim();
-                            // Assign values to variables based on variable name
-                            switch (varName)
-                            {
-                                case "dirPath":
-                                    dirPath = value;
-                                    defaultPathTextBox.Text = value; // Set text of the TextBox
-                                    break;
-                                case "dirPathCtrl":
-                                    dirPathCtrl = value; // Set dirPathCtrl value
-                                    ctrlPathTextBox.Text = value; // Set text of the TextBox
-                                    break;
-                                // Add more cases if needed
-                                case "dirPathShift":
-                                    dirPathShift = value; // Set dirPathShift value
-                                    shiftPathTextBox.Text = value; // Set text of the TextBox
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-            else // If settings file doesn't exist, set passive text
-            {
-                dirPath = "C:\\";
-                dirPathCtrl = "C:\\";
-                defaultPathTextBox.Text = "Enter default path...";
-                defaultPathTextBox.Foreground = Brushes.LightGray; // Set passive text color
-                ctrlPathTextBox.Text = "Enter CTRL+Enter path...";
-                ctrlPathTextBox.Foreground = Brushes.LightGray; // Set passive text color
-                shiftPathTextBox.Text = "Enter Shift+Enter path...";
-                shiftPathTextBox.Foreground = Brushes.LightGray; // Set passive text color
-            }
-        }
-
-
-        private void SaveSettings()
-        {
-            using StreamWriter writer = new(settingsFilePath);
-            {
-                writer.WriteLine("dirPath: " + dirPath);
-                writer.WriteLine("dirPathCtrl: " + dirPathCtrl);
-                writer.WriteLine("dirPathShift: " + dirPathShift);
+                System.Windows.Forms.MessageBox.Show("Folder name is null or empty.");
             }
         }
 
@@ -232,39 +176,75 @@ namespace Find_Project
             try
             {
                 // Set dirPath to the text in defaultPathTextBox
-                dirPath = defaultPathTextBox.Text.Trim();
+                settings.DirPath = defaultPathTextBox.Text.Trim();
                 // Set dirPathCtrl to the text in ctrlPathTextBox
-                dirPathCtrl = ctrlPathTextBox.Text.Trim();
+                settings.DirPathCtrl = ctrlPathTextBox.Text.Trim();
                 // Set dirPathShift to the text in altPathTextBox
-                dirPathShift = shiftPathTextBox.Text.Trim();
+                settings.DirPathShift = shiftPathTextBox.Text.Trim();
 
                 // Save the dirPath to the settings file
-                SaveSettings();
+                settings.SaveSettings();
 
-                MessageBox.Show("Settings saved successfully.");
+                System.Windows.MessageBox.Show("Settings saved successfully.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving settings: " + ex.Message);
+                System.Windows.MessageBox.Show("Error saving settings: " + ex.Message);
             }
         }
 
-        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
+        // Utility function to open a folder browser dialog
+        private static string? OpenFolderBrowserDialog()
         {
-            if (sender is TextBox textBox && (string)textBox.Tag == "Placeholder")
+            // Create a new folder browser dialog
+            using var dialog = new FolderBrowserDialog();
             {
-                textBox.Text = "";
-                textBox.Foreground = Brushes.Black; // Set text color to black when typing
+                // Set the description and root folder (optional)
+                dialog.Description = "Select the default path:";
+                dialog.RootFolder = Environment.SpecialFolder.MyComputer;
+
+                // Show the dialog and get the result
+                DialogResult result = dialog.ShowDialog();
+
+                // If the user selects a folder, return the selected path
+                if (result == System.Windows.Forms.DialogResult.OK)
+                {
+                    return dialog.SelectedPath;
+                }
+                else
+                {
+                    return null; // User cancelled or closed the dialog
+                }
             }
         }
 
-        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        private void DefaultPathButton_Click(object sender, RoutedEventArgs e)
         {
-            if (sender is TextBox textBox && string.IsNullOrWhiteSpace(textBox.Text))
+            // Open a folder browser dialog to select the default path and set the text box
+            string? selectedPath = OpenFolderBrowserDialog();
+            if (!string.IsNullOrEmpty(selectedPath))
             {
-                string placeholderText = (string)textBox.Tag;
-                textBox.Text = placeholderText;
-                textBox.Foreground = Brushes.LightGray; // Set text color to light gray when placeholder
+                defaultPathTextBox.Text = selectedPath;
+            }
+        }
+
+        private void CtrlPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Open a folder browser dialog to select the default path and set the text box
+            string? selectedPath = OpenFolderBrowserDialog();
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                ctrlPathTextBox.Text = selectedPath;
+            }
+        }
+
+        private void ShiftPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Open a folder browser dialog to select the default path and set the text box
+            string? selectedPath = OpenFolderBrowserDialog();
+            if (!string.IsNullOrEmpty(selectedPath))
+            {
+                shiftPathTextBox.Text = selectedPath;
             }
         }
 

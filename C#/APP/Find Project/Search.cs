@@ -9,7 +9,7 @@ namespace Find_Project
     {
         public static async Task<List<string>> SearchFoldersAsync(string query, string dirPath)
         {
-            List<string> results = new List<string>();
+            List<string> results = new();
 
             // Check if the query contains at least 3 characters
             if (query.Length < 3)
