@@ -22,12 +22,12 @@ namespace Find_Project
 
         private void InitializeListBox()
         {
-            var items = new List<ListBoxItemMetadata>();
+            var items = new List<SearchMetadata>();
             AppOperations.UpdateListBox(items, listBox, statusMessage);
         }
 
         // Helper function to open the folder of the selected item
-        private void OpenFolder(ListBoxItemMetadata selectedItem)
+        private void OpenFolder(SearchMetadata selectedItem)
         {
             if (selectedItem != null)
             {
@@ -69,7 +69,7 @@ namespace Find_Project
             try
             {
                 SearchService searchService = new();
-                List<ListBoxItemMetadata> items = await SearchService.PerformSearchAsync(searchBox.Text, path, settings.SearchDepth, searchContext);
+                List<SearchMetadata> items = await SearchService.PerformSearchAsync(searchBox.Text, path, settings.SearchDepth, searchContext);
 
                 // Update the ListBox with the search results
                 AppOperations.UpdateListBox(items, listBox, statusMessage);
@@ -92,27 +92,9 @@ namespace Find_Project
             }
         }
 
-        // ListBoxItemMetadata class to store the text and search context of each item
-        public class ListBoxItemMetadata
-        {
-            public string Text { get; }
-            public string SearchContext { get; }
-
-            public ListBoxItemMetadata(string text, string searchContext)
-            {
-                Text = text;
-                SearchContext = searchContext;
-            }
-
-            public override string ToString()
-            {
-                return Text;
-            }
-        }
-
         private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs? e)
         {
-            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
+            if (listBox.SelectedItem is SearchMetadata selectedItem)
             {
                 OpenFolder(selectedItem);
             }
@@ -130,7 +112,7 @@ namespace Find_Project
         private void VisualStudio_Click(object sender, RoutedEventArgs e)
         {
             // Open the selected item in Visual Studio Code
-            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
+            if (listBox.SelectedItem is SearchMetadata selectedItem)
             {
                 string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
                 string status = Utilities.FileOperations.OpenFolderInVSCode(fullPath);
@@ -143,7 +125,7 @@ namespace Find_Project
         private void Properties_Click(object sender, RoutedEventArgs e)
         {
             // Open the properties window for the selected item
-            if (listBox.SelectedItem is ListBoxItemMetadata selectedItem)
+            if (listBox.SelectedItem is SearchMetadata selectedItem)
             {
                 string fullPath = Utilities.FileOperations.GetFullPath(selectedItem, settings);
 

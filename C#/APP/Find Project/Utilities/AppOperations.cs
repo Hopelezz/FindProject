@@ -30,7 +30,7 @@ namespace Find_Project.Utilities
         }
 
         // Helper function to update the ListBox with search results
-        public static void UpdateListBox(List<ListBoxItemMetadata> items, ListBox listBox, TextBlock statusMessage)
+        public static void UpdateListBox(List<SearchMetadata> items, ListBox listBox, TextBlock statusMessage)
         {
             listBox.Items.Clear();
             foreach (var item in items)

@@ -11,21 +11,21 @@ namespace Find_Project.Utilities
     public static class FileOperations
     {
         // Helper function to update the ListBox with search results
-        public static List<ListBoxItemMetadata> UpdateListBox(List<string> results, string searchContext)
+        public static List<SearchMetadata> UpdateListBox(List<string> results, string searchContext)
         {
-            List<ListBoxItemMetadata> items = new();
+            List<SearchMetadata> items = new();
 
             foreach (string result in results)
             {
                 // Add the result along with its search context as a hidden item
-                items.Add(new ListBoxItemMetadata(result, searchContext));
+                items.Add(new SearchMetadata(result, searchContext));
             }
 
             return items;
         }
 
         // Utility function to get the full path of the selected item
-        public static string GetFullPath(ListBoxItemMetadata selectedItem, AppSettings settings)
+        public static string GetFullPath(SearchMetadata selectedItem, AppSettings settings)
         {
             string path = selectedItem.SearchContext switch
             {
@@ -148,7 +148,7 @@ namespace Find_Project.Utilities
 
     public class SearchService
     {
-        public static async Task<List<ListBoxItemMetadata>> PerformSearchAsync(string searchText, string path, int searchDepth, string searchContext)
+        public static async Task<List<SearchMetadata>> PerformSearchAsync(string searchText, string path, int searchDepth, string searchContext)
         {
             // Perform the search and return the results
             List<string> results = await Search.SearchFoldersAsync(searchText, path, searchDepth);
