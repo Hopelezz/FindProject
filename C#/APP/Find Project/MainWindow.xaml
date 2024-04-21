@@ -35,7 +35,7 @@
             </TabItem>
             <!-- Settings Tab -->
             <TabItem Header="Settings">
-                <Grid Margin="0,0,0,-23">
+                <Grid Margin="0,0,0,-13">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="163*"/>
                         <RowDefinition Height="19*"/>
