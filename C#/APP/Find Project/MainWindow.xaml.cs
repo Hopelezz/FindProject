@@ -64,7 +64,7 @@ namespace Find_Project
                 return;
             }
             // Update status bar
-            statusMessage.Text = $"{searchContext} | Directory: {path}";
+            statusMessage.Text = $"{searchContextText} | Directory: {path}";
 
             PerformSearch(path, searchContext);
         }
@@ -145,6 +145,9 @@ namespace Find_Project
                 {
                     // Open the folder or navigate to it if already open
                     OpenFolder(fullPath);
+
+                    // Update the status bar
+                    statusMessage.Text = "Opened folder: " + fullPath;
                 }
                 catch (Exception ex)
                 {
