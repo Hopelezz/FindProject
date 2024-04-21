@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Input;
 
@@ -22,7 +23,7 @@ namespace Find_Project
             shiftPathTextBox.Text = settings.DirPathShift;
         }
 
-        // SEARCH FUNCTIONS
+// SEARCH FUNCTIONS
         // KeyDown event handler for the search box
         private void SearchBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
@@ -31,7 +32,6 @@ namespace Find_Project
                 SearchButton_Click(sender, e);
             }
         }
-
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
@@ -59,6 +59,8 @@ namespace Find_Project
                 System.Windows.MessageBox.Show($"Please set the {searchContext} in settings.");
                 return;
             }
+            // Update status bar
+            statusMessage.Text = $"{searchContext} | Directory: {path}";
 
             PerformSearch(path, searchContext);
         }
@@ -185,12 +187,14 @@ namespace Find_Project
                 // Save the dirPath to the settings file
                 settings.SaveSettings();
 
-                System.Windows.MessageBox.Show("Settings saved successfully.");
+                // Update the status bar
+                statusMessage.Text = "Settings saved successfully.";
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show("Error saving settings: " + ex.Message);
             }
+
         }
 
         // Utility function to open a folder browser dialog
