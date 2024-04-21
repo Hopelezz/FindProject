@@ -81,7 +81,7 @@ namespace Find_Project
             try
             {
                 Search search = new();
-                List<string> results = await Search.SearchFoldersAsync(searchBox.Text, path);
+                List<string> results = await Search.SearchFoldersAsync(searchBox.Text, path, settings.SearchDepth);
 
                 UpdateListBox(results, searchContext);
                 // Remove any previous warning messages
@@ -181,12 +181,12 @@ namespace Find_Project
         {
             try
             {
-                // Set dirPath to the text in defaultPathTextBox
+                // Set the settings values from the text boxes and slider
                 settings.DirPath = defaultPathTextBox.Text.Trim();
-                // Set dirPathCtrl to the text in ctrlPathTextBox
                 settings.DirPathCtrl = ctrlPathTextBox.Text.Trim();
-                // Set dirPathShift to the text in altPathTextBox
                 settings.DirPathShift = shiftPathTextBox.Text.Trim();
+                // Set SearchDepth to the value of the slider
+                settings.SearchDepth = (int)searchDepthSlider.Value;
 
                 // Save the dirPath to the settings file
                 settings.SaveSettings();

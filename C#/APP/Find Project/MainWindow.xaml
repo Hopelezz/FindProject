@@ -37,8 +37,8 @@
             <TabItem Header="Settings">
                 <Grid Margin="0,0,0,-23">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="27*"/>
-                        <RowDefinition/>
+                        <RowDefinition Height="163*"/>
+                        <RowDefinition Height="19*"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" MinWidth="115"/>
@@ -76,11 +76,14 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="shiftPathTextBox" Tag="Enter Shift+Enter path..." Grid.Column="0" Margin="0,0,0,0" Height="30"/>
+
                         <Button Content="..." Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Foreground="Black" FontSize="16" Click="ShiftPathButton_Click" Grid.Column="1"/>
+                        <Slider x:Name="searchDepthSlider" Minimum="1" Maximum="5" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" Value="{Binding SearchDepth, Mode=TwoWay}" Margin="0,41,0,-41" />
                     </Grid>
 
                     <!-- Save Button -->
-                    <Button Content="Save" Click="SaveButton_Click" Margin="10,304,10,0" Grid.Column="1" Height="32" VerticalAlignment="Bottom"/>
+                    <Button Content="Save" Click="SaveButton_Click" Margin="10,0,10,0" Grid.Column="1" Height="32" VerticalAlignment="Center" Grid.Row="1"/>
+                    <Label Content="Folder Depth:" Margin="0,131,0,0" VerticalAlignment="Top" HorizontalAlignment="Center" Height="24" Width="114" HorizontalContentAlignment="Right" />
 
                 </Grid>
             </TabItem>

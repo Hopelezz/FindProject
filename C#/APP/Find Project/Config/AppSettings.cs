@@ -12,6 +12,7 @@ namespace Find_Project
         public string DirPathCtrl { get; set; } // Alternate directory path for CTRL+Enter search
         public string DirPathShift { get; set; } // Alternate directory path for Shift+Enter search
         public string SettingsFilePath { get; set; }
+        public int SearchDepth { get; set; } // Default search depth
 
         public AppSettings()
         {
@@ -56,6 +57,9 @@ namespace Find_Project
                                 case "dirPathShift":
                                     DirPathShift = value;
                                     break;
+                                case "searchDepth":
+                                    SearchDepth = int.Parse(value);
+                                    break;
                             }
                         }
                     }
@@ -67,30 +71,13 @@ namespace Find_Project
         {
             using StreamWriter writer = new(SettingsFilePath);
             {
+                writer.WriteLine("searchDepth: " + SearchDepth); // Save search depth
                 writer.WriteLine("dirPath: " + DirPath);
                 writer.WriteLine("dirPathCtrl: " + DirPathCtrl);
                 writer.WriteLine("dirPathShift: " + DirPathShift);
             }
         }
 
-        private void TextBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox && (string)textBox.Tag == "Placeholder")
-            {
-                textBox.Text = "";
-                textBox.Foreground = Brushes.Black; // Set text color to black when typing
-            }
-        }
-
-        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (sender is TextBox textBox && string.IsNullOrWhiteSpace(textBox.Text))
-            {
-                string placeholderText = (string)textBox.Tag;
-                textBox.Text = placeholderText;
-                textBox.Foreground = Brushes.LightGray; // Set text color to light gray when placeholder
-            }
-        }
     }
 }
 

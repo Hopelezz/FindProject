@@ -7,7 +7,7 @@ namespace Find_Project
 {
     public class Search
     {
-        public static async Task<List<string>> SearchFoldersAsync(string query, string dirPath)
+        public static async Task<List<string>> SearchFoldersAsync(string query, string dirPath, int searchDepth)
         {
             List<string> results = new();
 
@@ -21,7 +21,7 @@ namespace Find_Project
             {
                 await Task.Run(() =>
                 {
-                    SearchInLevel(results, dirPath, query, 0, "");
+                    SearchInLevel(results, dirPath, query, 0, "", searchDepth);
                 });
             }
             catch (Exception ex)
@@ -33,9 +33,9 @@ namespace Find_Project
             return results;
         }
 
-        private static void SearchInLevel(List<string> results, string dirPath, string query, int level, string currentRelativePath)
+        private static void SearchInLevel(List<string> results, string dirPath, string query, int level, string currentRelativePath, int searchDepth)
         {
-            if (level > 1) // Limit search to two levels deep
+            if (level > searchDepth) // Limit search to two levels deep
                 return;
 
             try
@@ -53,7 +53,7 @@ namespace Find_Project
                     }
 
                     // Recursively search in the next level
-                    SearchInLevel(results, directory, query, level + 1, Path.Combine(currentRelativePath, Path.GetFileName(directory)));
+                    SearchInLevel(results, directory, query, level + 1, Path.Combine(currentRelativePath, Path.GetFileName(directory)), searchDepth);
                 }
             }
             catch (UnauthorizedAccessException)
