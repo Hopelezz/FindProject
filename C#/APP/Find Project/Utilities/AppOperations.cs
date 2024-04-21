@@ -35,7 +35,7 @@ namespace Find_Project.Utilities
         public string RandomStatusMessage()
         {
 
-        List<string> statusMessages = new()
+            List<string> statusMessages = new()
             {
                 "Ready for a file-finding adventure?",
                 "Let's find those files!",
