@@ -1,0 +1,17 @@
+- electron-react/: This folder contains the Electron and React code.
+package.json: This file lists the project dependencies and scripts for building and running the application.
+- public/: This folder contains the main HTML file (index.html) that serves as the entry point for your React application.
+- src/: This folder contains the source code for your application.
+- src/main/: This folder contains the Electron main process code (main.js).
+- src/renderer/: This folder contains the React code for the renderer process.
+
+    - App.jsx: This is the root component of your React application.
+    - components/: This folder contains reusable React components, such as SearchTab.jsx and SettingsTab.jsx.
+- index.js: This is the entry point for the React renderer process.
+- styles/: This folder can contain global or component-specific styles.
+
+
+src/shared/: This folder can contain code or constants shared between the main and renderer processes.
+webpack.renderer.config.js: This file configures the Webpack bundler for the renderer process.
+Seeker.csproj: This is the .NET project file for your Electron.NET application.
+Program.cs: This is the entry point for your .NET application, which launches the Electron app.
