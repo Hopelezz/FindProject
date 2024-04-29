@@ -11,7 +11,7 @@ from qt_material import apply_stylesheet
 
 class SeekerApp(QMainWindow):
     file_types = {
-        "All Files": "*.*",
+        "All Files": ".",
         "Text Files": ".txt",
         "PDF Files": ".pdf",
         "Image Files": ".jpg .jpeg .png .gif .bmp .tiff",
@@ -162,7 +162,12 @@ class SeekerApp(QMainWindow):
         if self.searching:
             return
 
-        query = self.search_entry.text()
+        query = self.search_entry.text().strip()  # Get the search query and remove leading/trailing whitespace
+
+        if not query:  # Check if the search query is empty
+            self.set_feedback("Please enter a search query.")
+            return
+
         search_type = self.search_type_combo.currentText()
         path = self.default_path_entry.text()
 
@@ -196,25 +201,40 @@ class SeekerApp(QMainWindow):
             elif search_type == "File Type":
                 selected_file_type = self.file_type_combo.currentText()
                 if selected_file_type:
-                    file_type = self.file_types[selected_file_type]
-                    num_files = 0
-                    for root_dir, _, files in os.walk(path):
-                        for file in files:
-                            file_path = os.path.join(root_dir, file)
-                            # Check if the file has the specified extension
-                            if query.lower() in file.lower() and file.lower().endswith(tuple(file_type.split())):
-                                num_files += 1
-                                display_name = os.path.basename(file_path)
-                                self.result_listbox.addItem(display_name)
-                                self.metadata[display_name] = file_path
-                                self.set_status(f"Searching ({num_files} files found)...")
-                    self.set_status(f"Search completed. {num_files} files found.")
+                    if selected_file_type == "All Files":  # Handle the case when "All Files" is selected
+                        num_files = 0
+                        for root_dir, _, files in os.walk(path):
+                            for file in files:
+                                file_path = os.path.join(root_dir, file)
+                                # Add all files without filtering based on file type
+                                if query.lower() in file.lower():
+                                    num_files += 1
+                                    display_name = os.path.basename(file_path)
+                                    self.result_listbox.addItem(display_name)
+                                    self.metadata[display_name] = file_path
+                                    self.set_status(f"Searching ({num_files} files found)...")
+                        self.set_status(f"Search completed. {num_files} files found.")
+                    else:
+                        file_type = self.file_types[selected_file_type]
+                        num_files = 0
+                        for root_dir, _, files in os.walk(path):
+                            for file in files:
+                                file_path = os.path.join(root_dir, file)
+                                # Check if the file has the specified extension
+                                if query.lower() in file.lower() and file.lower().endswith(tuple(file_type.split())):
+                                    num_files += 1
+                                    display_name = os.path.basename(file_path)
+                                    self.result_listbox.addItem(display_name)
+                                    self.metadata[display_name] = file_path
+                                    self.set_status(f"Searching ({num_files} files found)...")
+                        self.set_status(f"Search completed. {num_files} files found.")
                 else:
                     self.set_feedback("File type not set.")
         except Exception as e:
             self.set_feedback(f"Error: {str(e)}")
         finally:
             self.stop_search()
+
 
     def open_item(self, event):
         selected_item_index = self.result_listbox.currentRow()
@@ -269,12 +289,14 @@ class SeekerApp(QMainWindow):
 
         if selected == "Folder":
             self.file_type_combo.setEnabled(False)
+            self.file_type_combo.clear()
         elif selected == "File Type":
             self.file_type_combo.setEnabled(True)
             self.file_type_combo.addItems([key.strip() for key in self.file_types.keys()])
+        else:
+            self.file_type_combo.setEnabled(False)
+            self.set_feedback("Invalid search type")
 
-        if selected != "Folder":
-            self.file_type_combo.setCurrentText("All")
 
     def set_status(self, status):
         self.status_bar.setText(status)
