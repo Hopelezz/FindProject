@@ -1,3 +1,0 @@
-Default Path: E:/CodeBase
-Search Type: File Type
-File Type: All
