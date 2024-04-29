@@ -168,3 +168,6 @@ $RECYCLE.BIN/
 /WPF/Find Project/.vs/Seeker/DesignTimeBuild
 /WPF/Find Project/.vs/Seeker/v17
 /Python/Seeker/seeker_settings.json
+/Electron/.vs/Electron/FileContentIndex
+/Electron/.vs
+/Python/Seeker/Refactor/__pycache__
