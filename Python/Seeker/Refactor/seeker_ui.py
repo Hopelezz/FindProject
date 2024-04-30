@@ -1,11 +1,11 @@
-# seeker_ui.py
-import os, threading
+import os
+import asyncio
 from PyQt5.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QFileDialog, QComboBox, QListWidget, QTabWidget, QSizePolicy, QSpacerItem, QApplication
 )
 from qt_material import apply_stylesheet
-from settings_manager import SettingsManager
+from Seeker.settings_manager import SettingsManager
 from search_manager import SearchManager
 from file_manager import FileManager
 
@@ -30,6 +30,7 @@ class SeekerUI(QMainWindow):
         self.create_search_tab()
         self.create_settings_tab()
         self.load_settings()
+        self.set_status("All Systems go!")
 
     def create_titlebar(self):
         titlebar_layout = QHBoxLayout()
@@ -50,7 +51,7 @@ class SeekerUI(QMainWindow):
         search_label = QLabel("Search for:")
         self.search_entry = QLineEdit()
         self.search_button = QPushButton("Search")
-        self.search_button.clicked.connect(self.start_search)
+        self.search_button.clicked.connect(self.on_search_button_clicked)
         search_entry_layout.addWidget(search_label)
         search_entry_layout.addWidget(self.search_entry)
         search_entry_layout.addWidget(self.search_button)
@@ -139,9 +140,34 @@ class SeekerUI(QMainWindow):
         self.result_listbox.clear()
         self.metadata = {}
 
-    def start_search(self):
+    async def start_search(self):
+        query = self.search_entry.text().strip()
+        search_type = self.search_type_combo.currentText()
+        path = self.default_path_entry.text().strip()
+        result_listbox = self.result_listbox
+        metadata = self.metadata  # Use the metadata provided by the UI instance
+        set_feedback = self.set_feedback
+        file_type_combo = self.file_type_combo
+        settings_manager = self.settings_manager
+        
+        num_items = 0  # Initialize the number of items found
+        
+        async def update_status_bar():
+            nonlocal num_items
+            self.set_status(f"Searching... (Found {num_items} items)")
+
+        try:
+            async for item in SearchManager.search_files(query, search_type, path, result_listbox, metadata, set_feedback, file_type_combo, settings_manager):
+                num_items += 1
+                await update_status_bar()
+            
+            self.set_status(f"Complete: Found {num_items} items.")
+        except Exception as e:
+            self.set_status(f"Search failed. Error: {str(e)}")
+
+    def on_search_button_clicked(self):
         self.clear_results_listbox()
-        SearchManager.start_search(self, self.metadata)
+        asyncio.run(self.start_search())
 
     def open_item(self):
             selected_item = self.result_listbox.currentItem()
@@ -161,7 +187,6 @@ class SeekerUI(QMainWindow):
             self.setStyleSheet("font-size: 18px; color: white;")
         else:
             self.setStyleSheet("font-size: 18px; color: black;")
-
 
     def select_default_path(self):
         path = QFileDialog.getExistingDirectory()

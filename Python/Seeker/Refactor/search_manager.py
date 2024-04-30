@@ -1,8 +1,9 @@
+import asyncio
 import os
 
 class SearchManager:
     @staticmethod
-    def search_files(query, search_type, path, result_listbox, metadata, set_status, set_feedback, file_type_combo, settings_manager):
+    async def search_files(query, search_type, path, result_listbox, metadata, set_status, file_type_combo, settings_manager):
         try:
             if search_type == "Folder":
                 num_folders = 0
@@ -13,12 +14,11 @@ class SearchManager:
                         display_name = os.path.basename(item_path)
                         result_listbox.addItem(display_name)
                         metadata[display_name] = item_path
-                        set_status(f"Searching ({num_folders} folders found)...")
+                        await asyncio.sleep(0)  # Yield to update the UI
                 set_status(f"Search completed. {num_folders} folders found.")
             elif search_type == "File Type":
                 if not file_type_combo or not settings_manager:
-                    set_feedback("File type information not available.")
-                    return
+                    raise ValueError("File type information not available.")
 
                 selected_file_type = file_type_combo.currentText()
                 if selected_file_type:
@@ -33,7 +33,7 @@ class SearchManager:
                                     display_name = os.path.basename(file_path)
                                     result_listbox.addItem(display_name)
                                     metadata[display_name] = file_path
-                                    set_status(f"Searching ({num_files} files found)...")
+                                    await asyncio.sleep(0)  # Yield to update the UI
                         set_status(f"Search completed. {num_files} files found.")
                     else:
                         file_type = file_types.get(selected_file_type)
@@ -47,17 +47,18 @@ class SearchManager:
                                         display_name = os.path.basename(file_path)
                                         result_listbox.addItem(display_name)
                                         metadata[display_name] = file_path
-                                        set_status(f"Searching ({num_files} files found)...")
+                                        await asyncio.sleep(0)  # Yield to update the UI
                             set_status(f"Search completed. {num_files} files found.")
                         else:
-                            set_feedback("Invalid file type selected.")
+                            raise ValueError("Invalid file type selected.")
                 else:
-                    set_feedback("File type not set.")
+                    raise ValueError("File type not set.")
         except Exception as e:
             set_status(f"Search failed. Error: {str(e)}")
 
+
     @staticmethod
-    def start_search(ui_instance, metadata):
+    async def start_search(ui_instance, metadata):
         query = ui_instance.search_entry.text().strip()
         search_type = ui_instance.search_type_combo.currentText()
         path = ui_instance.default_path_entry.text().strip()
@@ -67,5 +68,4 @@ class SearchManager:
         set_feedback = ui_instance.set_feedback
         file_type_combo = ui_instance.file_type_combo
         settings_manager = ui_instance.settings_manager
-        SearchManager.search_files(query, search_type, path, result_listbox, metadata, set_status, set_feedback, file_type_combo, settings_manager)
-
+        await SearchManager.search_files(query, search_type, path, result_listbox, metadata, set_status, set_feedback, file_type_combo, settings_manager)
