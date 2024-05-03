@@ -4,7 +4,7 @@ Add-Type -AssemblyName System.Drawing
 
 # Create the main form
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Search and Settings"
+$form.Text = "Seeker"
 $form.Size = New-Object System.Drawing.Size(800, 600)
 
 # Create a tab control to switch between Search and Settings
@@ -162,10 +162,6 @@ $tabControl.TabPages.Add($settingsTab)
 # Add tab control to form
 $form.Controls.Add($tabControl)
 
-# Function to handle search button click
-$searchButton.Add_Click({
-    Search
-})
 
 # Function to handle save settings button click
 $saveSettingsButton.Add_Click({
@@ -213,21 +209,20 @@ $form.Add_KeyDown({
     }
 })
 
-
-
-# Function to handle search button click
 $searchButton.Add_Click({
-    Search -Path $defaultPathTextBox.Text
+    Search -Path $defaultPathTextBox.Text -searchTextBox $searchTextBox -searchTypeComboBox $searchTypeComboBox
 })
+
 
 function Search {
     param(
         [string]$path,
         [System.Windows.Forms.TextBox]$searchTextBox,
-        [System.Windows.Forms.ComboBox]$searchTypeComboBox,
-        [System.Windows.Forms.ListBox]$resultsListBox
+        [System.Windows.Forms.ComboBox]$searchTypeComboBox
     )
-    
+    Write-Host $path
+    Write-Host $searchTextBox
+    Write-Host $searchTypeComboBox
     try {
         $searchText = $searchTextBox.Text
         $searchType = $searchTypeComboBox.SelectedItem.ToString()
@@ -241,6 +236,12 @@ function Search {
             if ($searchType -eq "Folder") {
                 # Search current directory
                 Get-ChildItem -Path $path -Directory -Recurse -Depth 1 | Where-Object { $_.Name -like "*$searchText*" } | ForEach-Object {
+                    $resultsListBox.Items.Add($_.FullName)
+                }
+            }
+            elseif ($searchType -eq "File") {
+                # Search current directory for files
+                Get-ChildItem -Path $path -File -Recurse | Where-Object { $_.Name -like "*$searchText*" } | ForEach-Object {
                     [void]$resultsListBox.Items.Add($_.FullName)
                 }
             }
