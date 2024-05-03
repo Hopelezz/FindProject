@@ -134,8 +134,7 @@ $settingsTab.Controls.Add($shiftPathButton)
 $searchTypeComboBox = New-Object System.Windows.Forms.ComboBox
 $searchTypeComboBox.Size = New-Object System.Drawing.Size(150, 25)
 $searchTypeComboBox.Location = New-Object System.Drawing.Point(10, 100)
-$searchTypeComboBox.Items.Add("Folder")
-$searchTypeComboBox.Items.Add("File")
+$searchTypeComboBox.Items.AddRange(@("Folder", "File"))
 
 $saveSettingsButton = New-Object System.Windows.Forms.Button
 $saveSettingsButton.Text = "Save Settings"
@@ -198,31 +197,18 @@ $form.Add_Load({
 $form.Add_KeyDown({
     param([System.Windows.Forms.KeyEventArgs]$e)
     
-    # Check if Ctrl key and Enter key are pressed
-    if ($e.KeyCode -eq 'Enter' -and $e.Control) {
-        # Perform search using CTRL path keybind
-        $ctrlPath = $ctrlPathTextBox.Text
-        if ($ctrlPath -ne "") {
-            $searchTypeComboBox.SelectedItem = "Folder"  # Assume searching folders for CTRL path
-            Search
+    if ($e.KeyCode -eq 'Enter') {
+        if ($e.Control) {
+            # Perform search using CTRL path keybind
+            Search -Path $ctrlPathTextBox.Text
         }
-    }
-    # Check if Shift key and Enter key are pressed
-    elseif ($e.KeyCode -eq 'Enter' -and $e.Shift) {
-        # Perform search using SHIFT path keybind
-        $shiftPath = $shiftPathTextBox.Text
-        if ($shiftPath -ne "") {
-            $searchTypeComboBox.SelectedItem = "Folder"  # Assume searching folders for SHIFT path
-            Search
+        elseif ($e.Shift) {
+            # Perform search using SHIFT path keybind
+            Search -Path $shiftPathTextBox.Text
         }
-    }
-    # Check if only Enter key is pressed
-    elseif ($e.KeyCode -eq 'Enter') {
-        # Perform search using default path
-        $defaultPath = $defaultPathTextBox.Text
-        if ($defaultPath -ne "") {
-            $searchTypeComboBox.SelectedItem = "Folder"  # Assume searching folders for default path
-            Search
+        else {
+            # Perform search using default path
+            Search -Path $defaultPathTextBox.Text
         }
     }
 })
@@ -231,40 +217,40 @@ $form.Add_KeyDown({
 
 # Function to handle search button click
 $searchButton.Add_Click({
-    Search
+    Search -Path $defaultPathTextBox.Text
 })
 
-# Function to perform search
 function Search {
-    $searchText = $searchTextBox.Text
-    $searchType = $searchTypeComboBox.SelectedItem.ToString()
+    param(
+        [string]$path,
+        [System.Windows.Forms.TextBox]$searchTextBox,
+        [System.Windows.Forms.ComboBox]$searchTypeComboBox,
+        [System.Windows.Forms.ListBox]$resultsListBox
+    )
     
-    # Define paths based on settings
-    $paths = @()
-    if ($defaultPathTextBox.Text -ne "") { $paths += $defaultPathTextBox.Text }
-    if ($ctrlPathTextBox.Text -ne "") { $paths += $ctrlPathTextBox.Text }
-    if ($shiftPathTextBox.Text -ne "") { $paths += $shiftPathTextBox.Text }
-    
-    # Clear existing items
-    $resultsListBox.Items.Clear()
-    
-    # Perform search in each path
-    foreach ($path in $paths) {
-        if ($searchType -eq "Folder") {
-            Get-ChildItem -Path $path -Directory | Where-Object { $_.Name -like "*$searchText*" } | ForEach-Object {
-                $resultsListBox.Items.Add($_.FullName)
-                Get-ChildItem -Path $_.FullName -Depth 1 -Directory | Where-Object { $_.Name -like "*$searchText*" } | ForEach-Object {
-                    $resultsListBox.Items.Add($_.FullName)
+    try {
+        $searchText = $searchTextBox.Text
+        $searchType = $searchTypeComboBox.SelectedItem.ToString()
+        if ($searchText.Length -lt 3) {
+            $WarningLabel.Text = "Input must contain at least 3 characters."
+            $WarningLabel.Visible = $true
+        }
+        else {
+            # Clear existing items
+            $resultsListBox.Items.Clear()
+            if ($searchType -eq "Folder") {
+                # Search current directory
+                Get-ChildItem -Path $path -Directory -Recurse -Depth 1 | Where-Object { $_.Name -like "*$searchText*" } | ForEach-Object {
+                    [void]$resultsListBox.Items.Add($_.FullName)
                 }
             }
         }
-        elseif ($searchType -eq "File") {
-            Get-ChildItem -Path $path -File | Where-Object { $_.Name -like "*$searchText*" } | ForEach-Object {
-                $resultsListBox.Items.Add($_.FullName)
-            }
-        }
+    }
+    catch {
+        Write-Host "An error occurred: $_"
     }
 }
+
 
 # Function to handle double click on results listbox
 $resultsListBox.Add_DoubleClick({
