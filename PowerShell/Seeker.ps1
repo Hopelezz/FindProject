@@ -1,3 +1,7 @@
+# Author: Mark Spratt
+# Date: 2024-05-05
+# Description: A simple file and folder search tool using PowerShell and WinForms
+
 # Import necessary assemblies
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
@@ -5,31 +9,43 @@ Add-Type -AssemblyName System.Drawing
 # Create the main form
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Seeker"
-$form.Size = New-Object System.Drawing.Size(600, 350)
+$form.Size = New-Object System.Drawing.Size(700, 500)
+$form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+$icon = [System.Drawing.Icon]::ExtractAssociatedIcon($PSHOME + "\powershell.exe")
+$form.Icon = $icon
 
+    
 # Create a grid layout
 $layout = New-Object System.Windows.Forms.TableLayoutPanel
-$layout.Dock = [System.Windows.Forms.DockStyle]::Fill
-$layout.ColumnCount = 1
-$layout.RowCount = 2
-$layout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 100)))
-$layout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 30)))
+    $layout.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $layout.ColumnCount = 1
+    $layout.RowCount = 2
+    $layout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Percent, 100)))
+    $layout.RowStyles.Add((New-Object System.Windows.Forms.RowStyle([System.Windows.Forms.SizeType]::Absolute, 30)))
+
+    # Create a status bar
+$statusBar = New-Object System.Windows.Forms.StatusStrip
+    $statusLabel = New-Object System.Windows.Forms.ToolStripStatusLabel
+    $statusLabel.Text = "All systems go!"
+    $statusBar.Items.Add($statusLabel)
 
 # Create a tab control
 $tabControl = New-Object System.Windows.Forms.TabControl
-$tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
 
 # [=========== Search Tab ===========]
 
 # Create the Search tab
 $searchTab = New-Object System.Windows.Forms.TabPage
-$searchTab.Text = "Search"
-$searchTab.Padding = New-Object System.Windows.Forms.Padding(10)
+    $searchTab.Text = "Search"
+    $searchTab.Padding = New-Object System.Windows.Forms.Padding(10)
 
     # Create controls for search tab
     $searchTextBox = New-Object System.Windows.Forms.TextBox
     $searchTextBox.Location = New-Object System.Drawing.Point(10, 15)
     $searchTextBox.Size = New-Object System.Drawing.Size(400, 25)
+    # Increate the font size for the search text box
+    $searchTextBox.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 12, [System.Drawing.FontStyle]::Regular)
 
     $searchButton = New-Object System.Windows.Forms.Button
     $searchButton.Location = New-Object System.Drawing.Point(420, 15)
@@ -50,6 +66,7 @@ $searchTab.Padding = New-Object System.Windows.Forms.Padding(10)
     [System.Windows.Forms.AnchorStyles]::Bottom -bor 
     [System.Windows.Forms.AnchorStyles]::Left -bor 
     [System.Windows.Forms.AnchorStyles]::Right
+    $resultsListBox.Font = New-Object System.Drawing.Font("Microsoft Sans Serif", 10, [System.Drawing.FontStyle]::Regular)
 
 $searchTab.Controls.AddRange(@($searchTextBox, $searchButton, $warningLabel, $resultsListBox))
 
@@ -74,7 +91,16 @@ $settingsTab.Padding = New-Object System.Windows.Forms.Padding(10)
     $defaultPathButton.Text = "Browse"
     $defaultPathButton.Size = New-Object System.Drawing.Size(80, 25)
     $defaultPathButton.Location = New-Object System.Drawing.Point(420, 10)
-
+    $defaultPathButton.Add_Click({
+        $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+        $folderBrowser.Description = "Select default path"
+        if ($folderBrowser.ShowDialog() -eq "OK") {
+            # Save selected path as default path
+            $defaultPathTextBox.Text = $folderBrowser.SelectedPath
+        }
+        $folderBrowser.Dispose()  # Dispose of the dialog after use
+    })
+    
     $ctrlPathLabel = New-Object System.Windows.Forms.Label
     $ctrlPathLabel.Text = "CTRL Path:"
     $ctrlPathLabel.Size = New-Object System.Drawing.Size(100, 25)
@@ -88,6 +114,15 @@ $settingsTab.Padding = New-Object System.Windows.Forms.Padding(10)
     $ctrlPathButton.Text = "Browse"
     $ctrlPathButton.Size = New-Object System.Drawing.Size(80, 25)
     $ctrlPathButton.Location = New-Object System.Drawing.Point(420, 40)
+    $ctrlPathButton.Add_Click({
+        $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+        $folderBrowser.Description = "Select ctrl path"
+        if ($folderBrowser.ShowDialog() -eq "OK") {
+            # Save selected path as CTRL path
+            $ctrlPathTextBox.Text = $folderBrowser.SelectedPath
+        }
+        $folderBrowser.Dispose()  # Dispose of the dialog after use
+    })
 
     $shiftPathLabel = New-Object System.Windows.Forms.Label
     $shiftPathLabel.Text = "SHIFT Path:"
@@ -102,6 +137,14 @@ $settingsTab.Padding = New-Object System.Windows.Forms.Padding(10)
     $shiftPathButton.Text = "Browse"
     $shiftPathButton.Size = New-Object System.Drawing.Size(80, 25)
     $shiftPathButton.Location = New-Object System.Drawing.Point(420, 70)
+    $shiftPathButton.Add_Click({
+        $folderBrowser = New-Object System.Windows.Forms.FolderBrowserDialog
+        $folderBrowser.Description = "Select shift path"
+        if ($folderBrowser.ShowDialog() -eq "OK") {
+            # Save selected path as SHIFT path
+            $shiftPathTextBox.Text = $folderBrowser.SelectedPath
+        }
+    })
 
     $searchTypeComboBox = New-Object System.Windows.Forms.ComboBox
     $searchTypeComboBox.Size = New-Object System.Drawing.Size(150, 25)
@@ -153,6 +196,12 @@ $settingsTab.Padding = New-Object System.Windows.Forms.Padding(10)
         "Temporary files" = ".tmp", ".temp"
     }    
     $fileTypeComboBox.Items.AddRange(@( $fileTypes.Keys))
+    # Update status bar based on the selected file type
+    $fileTypeComboBox.Add_SelectedIndexChanged({
+        $selectedFileType = $fileTypeComboBox.SelectedItem.ToString()
+        $selectedFileExtensions = $fileTypes[$selectedFileType]
+        UpdateStatus("Selected file type: $selectedFileType ($($selectedFileExtensions -join ', '))")
+    })
 
     $saveSettingsButton = New-Object System.Windows.Forms.Button
     $saveSettingsButton.Text = "Save Settings"
@@ -179,9 +228,12 @@ $tabControl.TabPages.AddRange(@($searchTab, $settingsTab))
 
 # Add tab control to layout
 $layout.Controls.Add($tabControl)
+$layout.Controls.Add($statusBar)
 
 # Add layout to the form
 $form.Controls.Add($layout)
+
+
 
 # Function to handle save settings button click
 $saveSettingsButton.Add_Click({
@@ -196,6 +248,7 @@ $saveSettingsButton.Add_Click({
     $settingsJson = $settings | ConvertTo-Json
     $settingsFilePath = [System.IO.Path]::Combine([Environment]::GetFolderPath("MyDocuments"), "SearchSettings.json")
     $settingsJson | Out-File -FilePath $settingsFilePath
+    UpdateStatus("Settings saved to $settingsFilePath")
 })
 
 # Load settings when the form loads
@@ -223,16 +276,19 @@ $searchTextBox.Add_KeyDown({
     if ($e.Control -and $e.KeyCode -eq 'Enter') {
         # Call Search function with the ctrlPathTextBox.Text
         Search -path $ctrlPathTextBox.Text
+        UpdateStatus("Path Searched " + $ctrlPathTextBox.Text)
     }
     # Check if Shift+Enter is pressed
     elseif ($e.Shift -and $e.KeyCode -eq 'Enter') {
         # Call Search function with the shiftPathTextBox.Text
         Search -path $shiftPathTextBox.Text
+        UpdateStatus("Path Searched " + $shiftPathTextBox.Text)
     }
     # Check if Enter is pressed without any modifier keys
     elseif ($e.KeyCode -eq 'Enter') {
         # Call Search function with the defaultPathTextBox.Text
         Search -path $defaultPathTextBox.Text
+        UpdateStatus("Path Searched " + $defaultPathTextBox.Text)        
     }
 })
 
@@ -240,6 +296,10 @@ $searchButton.Add_Click({
     # Call Search function with the default path
     Search -path $defaultPathTextBox.Text
 })
+# Function to update status bar text
+function UpdateStatus([string]$text) {
+    $statusLabel.Text = $text
+}
 
 function Search {
     param(
@@ -265,7 +325,9 @@ function Search {
         else {
             if ($searchType -eq "Folder") {
                 Get-ChildItem -Path $path -Directory -Recurse -Depth 1 | Where-Object { $_.Name -like "*$searchText*" } | ForEach-Object {
+                    $num_files = (Get-ChildItem -Path $_.FullName -File -Recurse).Count
                     $resultsListBox.Items.Add($_.FullName)
+                    UpdateStatus("Searching... ($num_files)")
                 }
             }
             elseif ($searchType -eq "File") {
@@ -275,6 +337,8 @@ function Search {
                 }
             }
         }
+        # Search Complete
+        UpdateStatus("Search Complete. Found: $($resultsListBox.Items.Count) items.")
     }
     catch {
         Write-Host "An error occurred: $_"
